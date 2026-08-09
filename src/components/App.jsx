@@ -1,0 +1,240 @@
+import { useState, useRef, useEffect } from "react";
+import { TERM_PRESETS } from "../data/terminology";
+import { COORDINATORS } from "../data/coordinators";
+import { OFFENSE_FORMATIONS } from "../data/formations";
+import { RUN_CONCEPTS, PASS_CONCEPTS } from "../data/concepts";
+import { pick, randInt, ordinal, fieldPos } from "../engine/utils";
+import { priorityList, familyLabel, gradeRun, gradePass, runExplain, passExplain, BUCKET_MID } from "../engine/grading";
+import { useVariantPicker } from "../hooks/useVariantPicker";
+import FieldView from "./FieldView";
+import SetupScreen from "./SetupScreen";
+import ScoutingReport from "./ScoutingReport";
+import Hud from "./Hud";
+import PresnapControls from "./PresnapControls";
+import ResultPanel from "./ResultPanel";
+import "../theme.css";
+
+export default function App() {
+  const [phase, setPhase] = useState("setup");
+  const [termId, setTermId] = useState("standard");
+  const [offenseStyle, setOffenseStyle] = useState(null);
+  const [coordinator, setCoordinator] = useState(null);
+
+  const [down, setDown] = useState(1);
+  const [distance, setDistance] = useState(10);
+  const [yardLine, setYardLine] = useState(25);
+
+  const [rep, setRep] = useState(null);
+  const [result, setResult] = useState(null);
+  const [log, setLog] = useState([]);
+  const [showTips, setShowTips] = useState(true);
+  const [stats, setStats] = useState({ Ideal: 0, Acceptable: 0, Misread: 0 });
+  const logRef = useRef(null);
+  const variant = useVariantPicker();
+  const term = TERM_PRESETS[termId];
+
+  useEffect(() => {
+    if (logRef.current) logRef.current.scrollTop = 0;
+  }, [log]);
+
+  function pushLog(entry) {
+    setLog((l) => [entry, ...l].slice(0, 7));
+  }
+
+  function drawRep(style, coord) {
+    const callType = Math.random() < style.runProb ? "run" : "pass";
+    const formationId = pick(style.formationPool);
+    const callSide = pick(["left", "right"]);
+    const baseBox = Math.max(4, Math.min(9, (Math.random() < coord.mofoProb ? randInt(5, 7) : randInt(6, 8)) + coord.boxBias));
+    const blitz = Math.random() < coord.blitzProb;
+    const mofoShown = Math.random() < coord.mofoProb;
+    const press = Math.random() < coord.pressProb;
+    const finalBox = blitz ? randInt(8, 9) : baseBox;
+    const stackSide = pick(["left", "right"]);
+    const shotgun = Math.random() < OFFENSE_FORMATIONS[formationId].shotgunProb;
+
+    let mofoActual = mofoShown;
+    let nudge = null;
+    if (coord.disguises && !blitz && Math.random() < 0.45) {
+      mofoActual = !mofoShown;
+      nudge = mofoShown ? { index: 1, dx: -30, dy: 65 } : { index: 0, dx: 40, dy: -20 };
+    }
+
+    setRep({
+      callType,
+      concept: callType === "run" ? pick(RUN_CONCEPTS) : pick(PASS_CONCEPTS),
+      formationId,
+      callSide,
+      shotgun,
+      shown: { mofo: mofoShown, press, blitz, box: finalBox, stackSide },
+      actual: { mofo: mofoActual, press, blitz, box: finalBox, stackSide },
+      nudge,
+    });
+    setPhase("presnap");
+  }
+
+  function chooseOffenseStyle(style) {
+    setOffenseStyle(style);
+    setCoordinator(pick(COORDINATORS));
+    setPhase("scouting");
+  }
+
+  function beginSession() {
+    setDown(1);
+    setDistance(10);
+    setYardLine(25);
+    setLog([]);
+    setStats({ Ideal: 0, Acceptable: 0, Misread: 0 });
+    drawRep(offenseStyle, coordinator);
+  }
+
+  function newDrive(spot) {
+    setYardLine(spot);
+    setDown(1);
+    setDistance(10);
+    drawRep(offenseStyle, coordinator);
+  }
+
+  function applyProgress(tier, callType, chosenBucket) {
+    let gain;
+    if (callType === "run") {
+      gain = tier === "Ideal" ? randInt(4, 8) : tier === "Acceptable" ? randInt(1, 3) : randInt(-3, 1);
+    } else {
+      const mult = tier === "Ideal" ? 1 : tier === "Acceptable" ? 0.55 : 0.1;
+      gain = Math.round((BUCKET_MID[chosenBucket] || 3) * mult) + randInt(-1, 1);
+    }
+    const turnover = tier === "Misread" && Math.random() < 0.14;
+    return { gain, turnover, newYardLine: Math.max(0, Math.min(100, yardLine + gain)) };
+  }
+
+  function decide(chosen, label) {
+    const { callType, actual, formationId, callSide } = rep;
+    let tier, explain;
+
+    if (callType === "run") {
+      const g = gradeRun(chosen, actual.box, OFFENSE_FORMATIONS[formationId].blockers, actual.stackSide, callSide);
+      tier = g.tier;
+      explain = runExplain(variant, { ...g, chosen });
+    } else {
+      const prio = priorityList(actual.mofo, actual.press, actual.blitz);
+      const g = gradePass(chosen, prio, yardLine, down, distance, rep.concept.depths);
+      tier = g.tier;
+      explain = passExplain(variant, term, g, actual.mofo, actual.press, actual.blitz, label);
+    }
+
+    const { gain, turnover, newYardLine } = applyProgress(tier, callType, chosen);
+    setStats((s) => ({ ...s, [tier]: s[tier] + 1 }));
+    const prefix = `${ordinal(down)} & ${distance} (${fieldPos(yardLine)}): `;
+
+    if (turnover) {
+      pushLog({ kind: "bad", text: `${prefix}${label} \u2014 ${tier}. Turnover.` });
+      setResult({ tier, explain, turnover: true, driveNote: "Turnover \u2014 new series." });
+      setPhase("result");
+      return;
+    }
+    if (newYardLine >= 100) {
+      pushLog({ kind: "good", text: `${prefix}${label} \u2014 ${tier}. Drive finishes in scoring range.` });
+      setResult({ tier, explain, driveDone: true, driveNote: "Nice series \u2014 new set coming up." });
+      setPhase("result");
+      return;
+    }
+    const gained = newYardLine - yardLine;
+    const madeIt = gained >= distance;
+    let nextDown = down + 1;
+    let nextDistance = distance - gained;
+    let driveNote = null;
+    if (madeIt) {
+      nextDown = 1;
+      nextDistance = Math.min(10, 100 - newYardLine);
+      driveNote = "Moves the chains.";
+    } else if (nextDown > 4) {
+      pushLog({ kind: "bad", text: `${prefix}${label} \u2014 ${tier}. Turnover on downs.` });
+      setYardLine(newYardLine);
+      setResult({ tier, explain, driveDone: true, driveNote: "Turnover on downs \u2014 new series." });
+      setPhase("result");
+      return;
+    }
+    pushLog({ kind: tier === "Ideal" ? "good" : tier === "Misread" ? "bad" : "neutral", text: `${prefix}${label} \u2014 ${tier}.` });
+    setYardLine(newYardLine);
+    setDown(nextDown);
+    setDistance(nextDistance);
+    setResult({ tier, explain, driveNote });
+    setPhase("result");
+  }
+
+  function nextRep() {
+    if (result?.turnover || result?.driveDone) {
+      newDrive(25);
+      return;
+    }
+    drawRep(offenseStyle, coordinator);
+  }
+
+  const shownFamily = rep ? familyLabel(term, rep.shown.mofo, rep.shown.press, rep.shown.blitz) : "";
+
+  return (
+    <div className="board-wrap">
+      <div className="inner">
+        <h1 className="title">GRIDIRON READ TRAINER</h1>
+        <p className="subtitle">Count the box, read the shell, make the call. Graded on decision quality.</p>
+
+        {phase === "setup" && (
+          <SetupScreen termId={termId} setTermId={setTermId} onChooseStyle={chooseOffenseStyle} />
+        )}
+
+        {phase === "scouting" && coordinator && (
+          <ScoutingReport coordinator={coordinator} onBegin={beginSession} />
+        )}
+
+        {(phase === "presnap" || phase === "result") && rep && (
+          <>
+            <Hud
+              down={down} distance={distance} yardLine={yardLine}
+              blockers={OFFENSE_FORMATIONS[rep.formationId].blockers} box={rep.shown.box}
+            />
+
+            <FieldView
+              shown={phase === "presnap" ? rep.shown : rep.actual}
+              nudge={phase === "presnap" ? rep.nudge : null}
+              formationId={rep.formationId}
+              callSide={rep.callSide}
+              shotgun={rep.shotgun}
+            />
+
+            {showTips && (
+              <div className="readbox">
+                <b>Shell:</b> {shownFamily}. <b>Personnel:</b> {OFFENSE_FORMATIONS[rep.formationId].name} ({OFFENSE_FORMATIONS[rep.formationId].strengthWord} {rep.callSide === "left" ? "Left" : "Right"}).
+              </div>
+            )}
+
+            {phase === "presnap" && (
+              <PresnapControls rep={rep} down={down} yardLine={yardLine} term={term} onDecide={decide} />
+            )}
+
+            {phase === "result" && result && <ResultPanel result={result} onNext={nextRep} />}
+
+            <label className="toggle-row">
+              <input type="checkbox" checked={showTips} onChange={(e) => setShowTips(e.target.checked)} />
+              Show shell &amp; personnel label (training wheels)
+            </label>
+
+            <div className="log" ref={logRef}>
+              {log.map((entry, i) => (
+                <div key={i} className={`log-entry ${entry.kind}`}>{entry.text}</div>
+              ))}
+            </div>
+
+            <div className="session-bar">
+              <span>Session:</span>
+              <span><b>{stats.Ideal}</b> Ideal &middot; <b>{stats.Acceptable}</b> Acceptable &middot; <b>{stats.Misread}</b> Misread</span>
+            </div>
+
+            <div className="footer-row">
+              <button className="btn btn-full" onClick={() => setPhase("setup")}>New Session</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
