@@ -1,7 +1,10 @@
 import { describe, test, expect } from "vitest";
 import { gradeRun, gradePass, priorityList } from "../src/engine/grading.js";
+import { computeBox, personnelFor } from "../src/engine/formationMath.js";
 import { OFFENSE_FORMATIONS } from "../src/data/formations.js";
 import { PASS_CONCEPTS } from "../src/data/concepts.js";
+
+function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 
 const RUN_OPTS = ["keep", "killflip", "rpohot"];
 const BUCKET_MAX = { checkdown: 4, short: 9, intermediate: 19, deep: 999 };
@@ -169,3 +172,58 @@ describe("pass concept data sanity", () => {
     }
   });
 });
+
+describe("computeBox — total defender count stays realistic", () => {
+  // Regression test: an earlier version rolled box count from an
+  // independent random draw uncorrelated with the safety count being
+  // shown, which sometimes produced as few as 8 visible defenders.
+  test("total defenders (DL 4 + LB + CB 2 + safeties) always lands in 10-12", () => {
+    for (let trial = 0; trial < 2000; trial++) {
+      const boxBias = [-1, 0, 1][trial % 3];
+      const blitz = trial % 7 === 0;
+      const mofoActual = trial % 2 === 0;
+      const box = computeBox(mofoActual, boxBias, blitz, randInt);
+      const safeties = blitz ? 0 : mofoActual ? 2 : 1;
+      const lb = Math.max(0, Math.min(5, box - 4));
+      const total = 4 + lb + 2 + safeties;
+      expect(total, `box=${box} safeties=${safeties} blitz=${blitz}`).toBeGreaterThanOrEqual(10);
+      expect(total, `box=${box} safeties=${safeties} blitz=${blitz}`).toBeLessThanOrEqual(12);
+    }
+  });
+
+  test("blitz always returns a heavy box (8-9)", () => {
+    for (let i = 0; i < 50; i++) {
+      const box = computeBox(true, 0, true, randInt);
+      expect(box).toBeGreaterThanOrEqual(8);
+      expect(box).toBeLessThanOrEqual(9);
+    }
+  });
+});
+
+describe("personnelFor — on-line vs off-line receiver depth", () => {
+  // Regression test: an earlier version placed off-line (flexed/slot)
+  // receivers CLOSER to the line of scrimmage than on-line ones,
+  // which put them visually on the defensive side of the LOS,
+  // overlapping the DL row.
+  const LOS_Y = 398;
+
+  test("on-line receivers/TEs are on the offensive side of the LOS, close to it", () => {
+    const f = OFFENSE_FORMATIONS.p12;
+    const personnel = personnelFor(f, "right", true);
+    const onLine = personnel.filter((p) => p.line === true);
+    for (const p of onLine) {
+      expect(p.y, `${p.r} at x=${p.x}`).toBeGreaterThan(LOS_Y);
+    }
+  });
+
+  test("off-line (flexed/slot) receivers are set back FURTHER than on-line ones, not closer", () => {
+    const f = OFFENSE_FORMATIONS.p11; // has both an on-line TE and an off-line slot WR
+    const personnel = personnelFor(f, "right", true);
+    const onLineYs = personnel.filter((p) => p.line === true).map((p) => p.y);
+    const offLineYs = personnel.filter((p) => p.line === false).map((p) => p.y);
+    const maxOnLine = Math.max(...onLineYs);
+    const minOffLine = Math.min(...offLineYs);
+    expect(minOffLine, "off-line receivers should sit further from the LOS than any on-line player").toBeGreaterThan(maxOnLine);
+  });
+});
+

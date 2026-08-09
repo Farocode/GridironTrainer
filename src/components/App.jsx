@@ -5,6 +5,7 @@ import { OFFENSE_FORMATIONS } from "../data/formations";
 import { RUN_CONCEPTS, PASS_CONCEPTS } from "../data/concepts";
 import { pick, randInt, ordinal, fieldPos } from "../engine/utils";
 import { priorityList, familyLabel, gradeRun, gradePass, runExplain, passExplain, BUCKET_MID } from "../engine/grading";
+import { computeBox } from "../engine/formationMath";
 import { useVariantPicker } from "../hooks/useVariantPicker";
 import FieldView from "./FieldView";
 import SetupScreen from "./SetupScreen";
@@ -45,11 +46,9 @@ export default function App() {
     const callType = Math.random() < style.runProb ? "run" : "pass";
     const formationId = pick(style.formationPool);
     const callSide = pick(["left", "right"]);
-    const baseBox = Math.max(4, Math.min(9, (Math.random() < coord.mofoProb ? randInt(5, 7) : randInt(6, 8)) + coord.boxBias));
     const blitz = Math.random() < coord.blitzProb;
     const mofoShown = Math.random() < coord.mofoProb;
     const press = Math.random() < coord.pressProb;
-    const finalBox = blitz ? randInt(8, 9) : baseBox;
     const stackSide = pick(["left", "right"]);
     const shotgun = Math.random() < OFFENSE_FORMATIONS[formationId].shotgunProb;
 
@@ -59,6 +58,10 @@ export default function App() {
       mofoActual = !mofoShown;
       nudge = mofoShown ? { index: 1, dx: -30, dy: 65 } : { index: 0, dx: 40, dy: -20 };
     }
+    // Box is tied to the TRUE safety count (disguise changes depth/
+    // alignment, not personnel grouping) so total defenders on screen
+    // always reads as a real, coherent 11-man defense.
+    const finalBox = computeBox(mofoActual, coord.boxBias, blitz, randInt);
 
     setRep({
       callType,

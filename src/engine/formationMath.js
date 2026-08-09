@@ -12,10 +12,28 @@ export function personnelFor(formation, callSide, shotgun) {
     const x = mirror ? 400 - p.x : p.x;
     let y = p.y;
     if (p.r === "QB") y = shotgun ? formation.qbShotgunY : 420;
-    else if (y === undefined) y = p.line ? 403 : 392;
+    else if (y === undefined) y = p.line ? 406 : 419;
     return { ...p, x, y };
   });
 }
+
+/**
+ * Box count generation. Deliberately tied to the TRUE safety count
+ * (not the pre-snap shown one, since disguise only changes depth/
+ * alignment, not personnel grouping) and bounded per shell so total
+ * defenders on screen (DL 4 + LB[box-4] + CB 2 + S[1 or 2]) always
+ * lands in a realistic ~10-12 range. An earlier version rolled box
+ * count from an independent random draw uncorrelated with the
+ * safety count being displayed, which produced reps with as few as
+ * 8 visible defenders — this function fixes that.
+ */
+export function computeBox(mofoActual, boxBias, blitz, randInt) {
+  if (blitz) return randInt(8, 9);
+  const [lo, hi] = mofoActual ? [6, 8] : [7, 9];
+  const base = mofoActual ? randInt(6, 7) : randInt(7, 8);
+  return Math.max(lo, Math.min(hi, base + boxBias));
+}
+
 
 /**
  * Positions linebackers near the line of scrimmage, shifted left or

@@ -5,7 +5,7 @@ export default function SetupScreen({ termId, setTermId, onChooseStyle }) {
   return (
     <div className="scout-card">
       <h3>Terminology</h3>
-      <p>Pick the language your staff actually uses. Only labels change \u2014 the reads stay the same.</p>
+      <p>Pick the language your staff actually uses. Only labels change — the reads stay the same.</p>
       <div className="term-row">
         {Object.entries(TERM_PRESETS).map(([id, t]) => (
           <button key={id} className={`btn ${termId === id ? "active" : ""}`} onClick={() => setTermId(id)}>

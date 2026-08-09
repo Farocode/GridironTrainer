@@ -18,7 +18,7 @@ export default function PresnapControls({ rep, down, yardLine, term, onDecide })
 
   return (
     <>
-      {down === 4 && <div className="urgent-flag">4th Down \u2014 staying on the field</div>}
+      {down === 4 && <div className="urgent-flag">4th Down — staying on the field</div>}
       <div className="called-banner">
         Coach calls <span className="play">{rep.concept.name}</span> {rep.callType === "run" ? "(run)" : "(pass)"}.
       </div>

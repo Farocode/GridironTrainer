@@ -110,7 +110,45 @@ tool needs:
   own custom labels yet. Planned as a future addition once the fixed
   presets prove insufficient in practice.
 
+## Fixed since initial scaffold
+
+- **Dash escape bug, for real this time.** An earlier fix was claimed
+  but never actually applied to the split files — `\u2014` was left
+  sitting in raw JSX text (which doesn't interpret JS escapes) in
+  `ScoutingReport.jsx`, `PresnapControls.jsx`, and `SetupScreen.jsx`.
+  All three now use a literal em dash character. If you ever see
+  `\u2014` rendered literally on screen again, grep for `\\u` in
+  `src/components/*.jsx` outside of quotes/backticks — that pattern
+  is always safe inside a JS string, never safe as bare JSX text.
+- **On-line vs. off-line receiver depth was inverted.** Off-line
+  (flexed/slot) players were placed *closer* to the LOS than on-line
+  players — actually on the defensive side of the line, overlapping
+  the DL row. Fixed in `formationMath.js`; see the regression tests
+  in `tests/grading.test.js`.
+- **Box count was decorrelated from the safety count being shown.**
+  It was rolled from an independent random draw, so reps could show
+  as few as 8 or as many as 13 total defenders. `computeBox()` now
+  ties box count to the *true* safety count (disguise only changes
+  depth/alignment, not personnel grouping) and bounds it so total
+  defenders on screen always lands in a realistic 10-12.
+
+## Backlog (deliberately deferred, not forgotten)
+
+- **Vertical space / mobile layout.** The field diagram uses a lot of
+  vertical room to show the defensive backfield at a readable depth,
+  which doesn't yet contour well to a short/mobile viewport. Needs a
+  real responsive pass (likely a shorter viewBox or a different
+  aspect ratio on narrow screens) rather than a quick tweak.
+- **Frame/container size should stay constant** regardless of
+  viewport height instead of compressing. Related to the mobile item
+  above — probably solved together.
+- **Feedback phrasing is still a bit wooden and repetitive** despite
+  the variant system. Logged for a future pass to make it sound more
+  like actual coach-speak rather than templated sentences with swapped
+  numbers.
+
 ## Extending
+
 
 - **Add a coordinator:** add an entry to `data/coordinators.js` with
   `mofoProb`, `pressProb`, `blitzProb`, `boxBias` (roughly -1 to +1),

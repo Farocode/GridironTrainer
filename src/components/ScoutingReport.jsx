@@ -1,7 +1,7 @@
 export default function ScoutingReport({ coordinator, onBegin }) {
   return (
     <div className="scout-card">
-      <h3>Scouting Report \u2014 {coordinator.name}</h3>
+      <h3>Scouting Report — {coordinator.name}</h3>
       <p>{coordinator.blurb}</p>
       {coordinator.disguises ? (
         <p><b>Disguise:</b> {coordinator.disguiseNote}</p>
