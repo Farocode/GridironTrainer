@@ -1,0 +1,31 @@
+/* Root reset. Loaded before theme.css so component styles can
+   override anything here if needed. */
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: #0c1a16;
+}
+
+#root {
+  /* 100dvh (dynamic viewport height) instead of 100vh: on mobile
+     browsers, 100vh is measured against the LARGEST possible viewport
+     (address bar hidden), so the page is taller than what's actually
+     visible when the address bar is showing — causing content to jump
+     as you scroll and the bar collapses/expands. 100dvh tracks the
+     REAL visible viewport, so this doesn't happen. */
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+            max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}

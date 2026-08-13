@@ -3,13 +3,30 @@
 .board-wrap {
   --board:#17332c; --board-dark:#0f221c; --chalk:#f2f0e6; --chalk-dim:rgba(242,240,230,0.5);
   --chalk-yellow:#e8c547; --chalk-red:#d06a58; --chalk-green:#9fd8a8; --frame:#6b4a34;
-  font-family:'Space Mono',monospace; color:var(--chalk); max-width:480px; margin:0 auto; padding:14px;
+  font-family:'Space Mono',monospace; color:var(--chalk);
+  width: 100%;
+  max-width: 430px;
+  /* Fixed frame size (like a phone screen) instead of hugging whatever
+     content is showing — this is the actual fix for the frame growing/
+     shrinking between the setup, presnap, and result screens.
+     100dvh (not 100vh) so it doesn't jump when a mobile browser's
+     address bar shows/hides. */
+  height: min(100dvh - 24px, 860px);
+  max-height: 860px;
+  display: flex;
+  flex-direction: column;
+  padding:14px;
   background:var(--frame); border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,0.35);
+  overflow: hidden;
 }
 .inner {
   background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.03), transparent 40%),
     radial-gradient(circle at 80% 85%, rgba(255,255,255,0.03), transparent 40%), var(--board);
   border-radius:8px; padding:16px 14px 20px;
+  flex: 1;
+  min-height: 0; /* required for the flex child to actually scroll instead of overflowing */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 h1.title { font-family:'Anton',sans-serif; letter-spacing:0.03em; font-size:23px; margin:0 0 2px; color:var(--chalk); }
 .subtitle { font-size:11px; color:var(--chalk-dim); margin-bottom:12px; line-height:1.5; }

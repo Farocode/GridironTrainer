@@ -56,7 +56,7 @@ export default function App() {
     let nudge = null;
     if (coord.disguises && !blitz && Math.random() < 0.45) {
       mofoActual = !mofoShown;
-      nudge = mofoShown ? { index: 1, dx: -30, dy: 65 } : { index: 0, dx: 40, dy: -20 };
+      nudge = mofoShown ? { index: 1, dx: -30, dy: 40 } : { index: 0, dx: 40, dy: -13 };
     }
     // Box is tied to the TRUE safety count (disguise changes depth/
     // alignment, not personnel grouping) so total defenders on screen

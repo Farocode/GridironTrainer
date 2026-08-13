@@ -11,8 +11,8 @@ export function personnelFor(formation, callSide, shotgun) {
   return formation.personnel.map((p) => {
     const x = mirror ? 400 - p.x : p.x;
     let y = p.y;
-    if (p.r === "QB") y = shotgun ? formation.qbShotgunY : 420;
-    else if (y === undefined) y = p.line ? 406 : 419;
+    if (p.r === "QB") y = shotgun ? formation.qbShotgunY : 216;
+    else if (y === undefined) y = p.line ? 214 : 224;
     return { ...p, x, y };
   });
 }
@@ -51,7 +51,7 @@ export function lbPositions(count, stackSide) {
     const t = count === 1 ? 0.5 : i / (count - 1);
     arr.push({
       x: Math.max(50, Math.min(350, left + t * (right - left))),
-      y: 355 + (i % 2 === 0 ? 0 : 9),
+      y: 176 + (i % 2 === 0 ? 0 : 8),
       role: "LB",
     });
   }

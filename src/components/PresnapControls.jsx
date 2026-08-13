@@ -20,7 +20,12 @@ export default function PresnapControls({ rep, down, yardLine, term, onDecide })
     <>
       {down === 4 && <div className="urgent-flag">4th Down — staying on the field</div>}
       <div className="called-banner">
-        Coach calls <span className="play">{rep.concept.name}</span> {rep.callType === "run" ? "(run)" : "(pass)"}.
+        Coach calls{" "}
+        <span className="play">
+          {rep.concept.name}
+          {rep.callType === "run" ? ` ${rep.callSide === "left" ? "Left" : "Right"}` : ""}
+        </span>{" "}
+        {rep.callType === "run" ? "(run)" : "(pass)"}.
       </div>
       <div className="concept-blurb">{rep.concept.blurb}</div>
       <div className="btn-grid">

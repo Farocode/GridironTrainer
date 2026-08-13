@@ -131,21 +131,42 @@ tool needs:
   ties box count to the *true* safety count (disguise only changes
   depth/alignment, not personnel grouping) and bounds it so total
   defenders on screen always lands in a realistic 10-12.
+- **Frame size was inconsistent between screens** (short on setup, tall
+  on presnap, medium on result). `board-wrap` is now a fixed-size frame
+  (mobile-first, `100dvh`-based so it doesn't jump when a phone's
+  address bar shows/hides) with content scrolling inside it instead of
+  the frame resizing. See `src/index.css`.
+- **Field diagram had ~100px of dead space above the safeties**, on
+  every single rep, because the canvas was sized for a depth no shell
+  ever actually used (deepest safety never rendered above y=100 on a
+  480-tall canvas). This was enough to force a scrollbar even on a 4K
+  desktop monitor. Rescaled the whole diagram — canvas is now 280 tall
+  instead of 480 (all coordinates in `FieldView.jsx`, `formationMath.js`,
+  and `formations.js` updated together; see the depth-ordering test in
+  `tests/grading.test.js`).
+- **Run play calls now include a direction** (e.g. "Inside Zone Right"),
+  using the same `callSide` that already drives the strong-side diagram
+  marker and the Kill-Flip button's direction — no new state, just
+  surfacing data that already existed. Purely a display change in
+  `PresnapControls.jsx`.
 
 ## Backlog (deliberately deferred, not forgotten)
 
-- **Vertical space / mobile layout.** The field diagram uses a lot of
-  vertical room to show the defensive backfield at a readable depth,
-  which doesn't yet contour well to a short/mobile viewport. Needs a
-  real responsive pass (likely a shorter viewBox or a different
-  aspect ratio on narrow screens) rather than a quick tweak.
-- **Frame/container size should stay constant** regardless of
-  viewport height instead of compressing. Related to the mobile item
-  above — probably solved together.
 - **Feedback phrasing is still a bit wooden and repetitive** despite
   the variant system. Logged for a future pass to make it sound more
   like actual coach-speak rather than templated sentences with swapped
   numbers.
+- **Always-11 defense with a variable front (3/4/5-man DL, weighted to
+  a side) instead of a fixed 4-man line.** Explicitly deprioritized —
+  design decision, not an oversight: safety count (MOFO/MOFC) is the
+  first and most important read in the whole progression, and front
+  variation is texture on top of the box-count read, not a new skill
+  the trainer should be teaching yet. Don't build this until the core
+  safety/box/leverage progression is solid and tested. When it's time:
+  the current `computeBox()` bounds the total to ~10-12 as an
+  approximation; a true fix makes DL count variable and derives
+  `LB = 11 - DL - CB(2) - Safeties(1 or 2)` so the total is always
+  exactly 11 by construction, not a range.
 
 ## Extending
 

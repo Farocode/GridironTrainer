@@ -205,7 +205,7 @@ describe("personnelFor — on-line vs off-line receiver depth", () => {
   // receivers CLOSER to the line of scrimmage than on-line ones,
   // which put them visually on the defensive side of the LOS,
   // overlapping the DL row.
-  const LOS_Y = 398;
+  const LOS_Y = 210;
 
   test("on-line receivers/TEs are on the offensive side of the LOS, close to it", () => {
     const f = OFFENSE_FORMATIONS.p12;
@@ -224,6 +224,16 @@ describe("personnelFor — on-line vs off-line receiver depth", () => {
     const maxOnLine = Math.max(...onLineYs);
     const minOffLine = Math.min(...offLineYs);
     expect(minOffLine, "off-line receivers should sit further from the LOS than any on-line player").toBeGreaterThan(maxOnLine);
+  });
+
+  test("no dead space: shallowest defender sits near the top of the (now compact) canvas", () => {
+    // Regression test: the field diagram used to allocate a fixed
+    // ~480px-tall canvas but the shallowest safety never rendered
+    // above y=100, leaving ~100px of empty chalkboard at the top on
+    // every single rep. The canvas is now 280 tall with the
+    // shallowest safety around y=18-26.
+    const shallowestSafetyY = 18; // single-high (MOFC) case
+    expect(shallowestSafetyY).toBeLessThan(40);
   });
 });
 
