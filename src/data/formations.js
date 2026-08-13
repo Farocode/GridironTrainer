@@ -13,10 +13,10 @@
 export const OFFENSE_FORMATIONS = {
   p12: {
     name: "12 Personnel", desc: "1 RB, 2 TE", blockers: 7,
-    strengthWord: "TE Strong", strongDefault: "right", shotgunProb: 0.55, qbShotgunY: 256,
+    strengthWord: "TE Strong", strongDefault: "right", shotgunProb: 0.55, qbShotgunY: 270,
     personnel: [
       { x: 200, r: "QB" },
-      { x: 200, y: 236, r: "RB" },
+      { x: 200, y: 246, r: "RB" },
       { x: 100, r: "TE", line: false },
       { x: 300, r: "TE", line: true },
       { x: 40, r: "WR", line: true },
@@ -25,11 +25,11 @@ export const OFFENSE_FORMATIONS = {
   },
   p21: {
     name: "21 Personnel", desc: "2 RB, 1 TE \u2014 Power I", blockers: 7,
-    strengthWord: "I-Strong", strongDefault: "right", shotgunProb: 0.4, qbShotgunY: 258,
+    strengthWord: "I-Strong", strongDefault: "right", shotgunProb: 0.4, qbShotgunY: 268,
     personnel: [
       { x: 200, r: "QB" },
-      { x: 178, y: 232, r: "FB" },
-      { x: 225, y: 238, r: "RB" },
+      { x: 178, y: 240, r: "FB" },
+      { x: 225, y: 248, r: "RB" },
       { x: 320, r: "TE", line: true },
       { x: 40, r: "WR", line: true },
       { x: 360, r: "WR", line: true },
@@ -37,10 +37,10 @@ export const OFFENSE_FORMATIONS = {
   },
   p11: {
     name: "11 Personnel", desc: "1 RB, 1 TE, 3 WR", blockers: 6,
-    strengthWord: "Trips", strongDefault: "right", shotgunProb: 0.85, qbShotgunY: 254,
+    strengthWord: "Trips", strongDefault: "right", shotgunProb: 0.85, qbShotgunY: 268,
     personnel: [
       { x: 200, r: "QB" },
-      { x: 200, y: 234, r: "RB" },
+      { x: 200, y: 244, r: "RB" },
       { x: 310, r: "TE", line: true },
       { x: 40, r: "WR", line: true },
       { x: 360, r: "WR", line: true },
@@ -49,10 +49,10 @@ export const OFFENSE_FORMATIONS = {
   },
   p10: {
     name: "10 Personnel", desc: "1 RB, 4 WR \u2014 spread", blockers: 5,
-    strengthWord: "Trips", strongDefault: "right", shotgunProb: 0.95, qbShotgunY: 262,
+    strengthWord: "Trips", strongDefault: "right", shotgunProb: 0.95, qbShotgunY: 270,
     personnel: [
       { x: 200, r: "QB" },
-      { x: 200, y: 236, r: "RB" },
+      { x: 200, y: 246, r: "RB" },
       { x: 20, r: "WR", line: true },
       { x: 260, r: "WR", line: false },
       { x: 320, r: "WR", line: false },
@@ -61,12 +61,12 @@ export const OFFENSE_FORMATIONS = {
   },
   p20: {
     name: "20 Personnel", desc: "2 RB, 0 TE \u2014 flexbone", blockers: 6,
-    strengthWord: "Wing Strong", strongDefault: "right", shotgunProb: 0.5, qbShotgunY: 264,
+    strengthWord: "Wing Strong", strongDefault: "right", shotgunProb: 0.5, qbShotgunY: 274,
     personnel: [
       { x: 200, r: "QB" },
-      { x: 200, y: 234, r: "FB" },
-      { x: 155, y: 240, r: "HB" },
-      { x: 285, y: 234, r: "HB" },
+      { x: 200, y: 246, r: "FB" },
+      { x: 155, y: 236, r: "HB" },
+      { x: 285, y: 236, r: "HB" },
       { x: 30, r: "WR", line: true },
       { x: 370, r: "WR", line: true },
     ],

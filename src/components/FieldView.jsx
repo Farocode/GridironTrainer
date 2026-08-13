@@ -28,7 +28,7 @@ export default function FieldView({ shown, nudge, formationId, callSide, shotgun
   const defenders = [...safetiesN, ...corners, ...lbs];
 
   return (
-    <svg viewBox="0 0 400 280" className="field-svg" role="img" aria-label="defensive look">
+    <svg viewBox="0 -18 400 313" className="field-svg" role="img" aria-label="defensive look">
       <defs>
         <filter id="chalkRough" x="-20%" y="-20%" width="140%" height="140%">
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />
@@ -47,10 +47,9 @@ export default function FieldView({ shown, nudge, formationId, callSide, shotgun
         <line key={y} x1="10" y1={y} x2="390" y2={y} className="yardline" />
       ))}
       <line x1="10" y1="210" x2="390" y2="210" className="los" />
-      <text x="200" y="222" textAnchor="middle" className="los-label">LINE OF SCRIMMAGE</text>
       <text
         x={callSide === "right" ? 385 : 15}
-        y="232"
+        y="222"
         textAnchor={callSide === "right" ? "end" : "start"}
         className="strong-label"
       >

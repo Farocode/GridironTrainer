@@ -150,8 +150,34 @@ tool needs:
   surfacing data that already existed. Purely a display change in
   `PresnapControls.jsx`.
 
+## Deploying (for beta sharing)
+
+The project auto-builds and deploys to GitHub Pages on every push to
+`main` via `.github/workflows/deploy.yml`. One-time setup after this
+is pushed to your repo:
+
+1. On GitHub: repo **Settings → Pages → Source → GitHub Actions**.
+2. Push to `main` (or re-run the workflow from the Actions tab).
+3. Your link will be `https://<your-username>.github.io/<repo-name>/`.
+
+The app is a phone-shaped frame by design (see `board-wrap` in
+`theme.css`) — opening the link in any desktop browser already gives
+you the "phone screen on a desktop" presentation without any extra
+work. That's the current plan for beta sharing: one link, works as-is
+in desktop Chrome/Safari or mobile Chrome.
+
+A future "choose Desktop / Phone / Tablet" landing screen was
+discussed and deliberately deferred (see Backlog) — the current fixed
+phone-frame approach already covers the immediate beta-sharing goal
+without that added complexity.
+
 ## Backlog (deliberately deferred, not forgotten)
 
+- **Device-chooser landing screen** (pick Desktop / Phone / Tablet
+  before entering the trainer, to make the demo link look intentional
+  regardless of viewer's device). Logged as a future idea, not
+  needed for the current beta-sharing plan (see Deploying above),
+  which just relies on the frame already being phone-shaped.
 - **Feedback phrasing is still a bit wooden and repetitive** despite
   the variant system. Logged for a future pass to make it sound more
   like actual coach-speak rather than templated sentences with swapped

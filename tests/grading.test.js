@@ -226,11 +226,42 @@ describe("personnelFor — on-line vs off-line receiver depth", () => {
     expect(minOffLine, "off-line receivers should sit further from the LOS than any on-line player").toBeGreaterThan(maxOnLine);
   });
 
+  test("on-line/off-line gap is wide enough to actually read as distinct, not just technically ordered", () => {
+    // Regression test: an earlier version had only a 10px gap, which
+    // was visually indistinguishable and also collided with the (now
+    // removed) LOS label text.
+    const f = OFFENSE_FORMATIONS.p11;
+    const personnel = personnelFor(f, "right", true);
+    const onLine = personnel.find((p) => p.line === true);
+    const offLine = personnel.find((p) => p.line === false);
+    expect(offLine.y - onLine.y, "gap should be clearly visible, not just non-zero").toBeGreaterThanOrEqual(15);
+  });
+
+  test("no two personnel markers overlap, for every formation in both postures", () => {
+    // Regression test: p20's FB shared the QB's exact x-coordinate and
+    // was only 18px away vertically — with 11px-radius circle markers
+    // (22px combined), that's a direct visual overlap ("FB lined up in
+    // front of QB").
+    const RADIUS_SUM = 22;
+    for (const [id, f] of Object.entries(OFFENSE_FORMATIONS)) {
+      for (const shotgun of [true, false]) {
+        const personnel = personnelFor(f, "right", shotgun);
+        for (let i = 0; i < personnel.length; i++) {
+          for (let j = i + 1; j < personnel.length; j++) {
+            const a = personnel[i], b = personnel[j];
+            const dist = Math.hypot(a.x - b.x, a.y - b.y);
+            expect(dist, `${id} shotgun=${shotgun}: ${a.r}(${a.x},${a.y}) vs ${b.r}(${b.x},${b.y})`).toBeGreaterThanOrEqual(RADIUS_SUM);
+          }
+        }
+      }
+    }
+  });
+
   test("no dead space: shallowest defender sits near the top of the (now compact) canvas", () => {
     // Regression test: the field diagram used to allocate a fixed
     // ~480px-tall canvas but the shallowest safety never rendered
     // above y=100, leaving ~100px of empty chalkboard at the top on
-    // every single rep. The canvas is now 280 tall with the
+    // every single rep. The canvas is now 295 tall with the
     // shallowest safety around y=18-26.
     const shallowestSafetyY = 18; // single-high (MOFC) case
     expect(shallowestSafetyY).toBeLessThan(40);

@@ -12,7 +12,7 @@ export function personnelFor(formation, callSide, shotgun) {
     const x = mirror ? 400 - p.x : p.x;
     let y = p.y;
     if (p.r === "QB") y = shotgun ? formation.qbShotgunY : 216;
-    else if (y === undefined) y = p.line ? 214 : 224;
+    else if (y === undefined) y = p.line ? 214 : 232;
     return { ...p, x, y };
   });
 }
