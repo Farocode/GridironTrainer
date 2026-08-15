@@ -112,6 +112,20 @@ tool needs:
 
 ## Fixed since initial scaffold
 
+- **Shotgun sets had the RB stacked directly on the QB's x-coordinate**,
+  reading as "the back lined up in front of the QB." Single-back
+  formations (`p12`, `p11`, `p10`, marked `gunOffset: true`) now offset
+  the RB to the weak side in shotgun; under center it correctly stays
+  in-line (that alignment was already realistic). `p21` (I-form, fixed
+  FB) and `p20` (flexbone, fixed wing alignment) intentionally untouched.
+- **Blockers-vs-Box was grouped with situational game state** (down,
+  distance, field position) in the top HUD, when it's actually part of
+  the pre-snap read, same family as shell and personnel. Moved to its
+  own always-visible strip next to the shell/personnel readbox — still
+  never gated behind training wheels, since that was a deliberate
+  earlier decision (box count is given, unlike MOFO/MOFC and leverage
+  which stay a pure visual read).
+
 - **Dash escape bug, for real this time.** An earlier fix was claimed
   but never actually applied to the split files — `\u2014` was left
   sitting in raw JSX text (which doesn't interpret JS escapes) in
@@ -171,7 +185,49 @@ discussed and deliberately deferred (see Backlog) — the current fixed
 phone-frame approach already covers the immediate beta-sharing goal
 without that added complexity.
 
+## Future ideas (unscoped brainstorm, not committed to)
+
+Captured here specifically so they survive a fresh chat/context reset
+— none of these are scoped or agreed to build, just worth not losing.
+
+- **Defense version.** A genuine mirror of the current trainer: player
+  sees the offense's formation/personnel and down-and-distance, and
+  has to make the *defensive* call (box/leverage/coverage shell)
+  instead of reading one. A lot of the data layer would transfer
+  (formations, box math, strong-side concept), but the grading logic
+  needs to be built fresh in the other direction. Treat as its own
+  mode built on the shared data layer, not a quick reskin.
+- **Opponent selection beyond a single coordinator per session** — a
+  "schedule" of several coordinators in sequence, named/flavored
+  opponents for realism.
+- **Session summary with a diagnostic breakdown** instead of just the
+  live tally — e.g. "3 of 4 misreads were box math, 1 was leverage."
+  Cheap to add: `gradeRun`/`gradePass` already return a `reason`/
+  `ideal` field, this would just aggregate what's already there.
+- **Local persistence** (`localStorage`, no backend needed) so a
+  session's stats survive a page reload. Currently everything resets.
+- **Optional timed/urgency mode** — a countdown before the defense
+  "snaps early," simulating real pre-snap time pressure. Explicitly
+  opt-in; the default mode is deliberately unhurried pattern
+  recognition.
+- **Exportable/shareable session results** for a coach reviewing
+  after the fact, rather than watching live.
+- **Team color customization** — the chalkboard theme is centralized
+  in CSS variables in `theme.css`, so this would be cheap whenever
+  it's wanted.
+
 ## Backlog (deliberately deferred, not forgotten)
+
+- **Tier colors (green/yellow/red for Ideal/Acceptable/Misread) are
+  the classic red-green colorblind confusion pair** (~8% of men,
+  deuteranopia/protanopia). This is a real accessibility bug, not
+  just a brainstorm item — worth prioritizing over the ideas above.
+  Options: shift the red toward orange/amber so it stays
+  distinguishable from the green under most color-vision deficiencies,
+  and/or stop relying on color alone (the tier is already spelled out
+  as text — "IDEAL"/"MISREAD" — so this is mainly about the accent
+  color and the field diagram's blitz-arrow red, not a text-only
+  problem).
 
 - **Device-chooser landing screen** (pick Desktop / Phone / Tablet
   before entering the trainer, to make the demo link look intentional
@@ -179,9 +235,26 @@ without that added complexity.
   needed for the current beta-sharing plan (see Deploying above),
   which just relies on the frame already being phone-shaped.
 - **Feedback phrasing is still a bit wooden and repetitive** despite
-  the variant system. Logged for a future pass to make it sound more
-  like actual coach-speak rather than templated sentences with swapped
-  numbers.
+  the variant system, and some of it is genuinely ambiguous rather
+  than just plain. Two concrete examples flagged to fix when this gets
+  revisited:
+  - *"Given the down and distance, that needed more than it could
+    reasonably get."* — "that" is unclear (the chosen depth? the
+    situation?). Should instead name the actual mechanism, e.g. that
+    the QB had time and routes were developing downfield, or that a
+    checkdown was overly conservative given the receivers had room to
+    separate.
+  - *"Acceptable — Reasonable read, just short of what the situation
+    demanded."* (said about throwing intermediate into an all-out
+    blitz, i.e. the longest available option). Should name the actual
+    risk instead — e.g. that holding the ball for a longer-developing
+    route leaves the QB exposed to the rush as the play unfolds.
+  General direction: explanations should read like a coach naming the
+  specific mechanism (protection, leverage, time-to-throw), not a
+  generic tier description with the numbers swapped in.
+- **Let the player choose which defensive coordinator to face**,
+  instead of always being assigned one at random at setup. Random
+  assignment stays the default; add the option to pick one directly.
 - **Always-11 defense with a variable front (3/4/5-man DL, weighted to
   a side) instead of a fixed 4-man line.** Explicitly deprioritized —
   design decision, not an oversight: safety count (MOFO/MOFC) is the

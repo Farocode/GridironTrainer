@@ -32,10 +32,18 @@ h1.title { font-family:'Anton',sans-serif; letter-spacing:0.03em; font-size:23px
 .subtitle { font-size:11px; color:var(--chalk-dim); margin-bottom:8px; line-height:1.5; }
 .hud {
   border:1px solid rgba(242,240,230,0.25); border-radius:6px; padding:8px 10px; margin-bottom:8px;
-  display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; font-size:10.5px; text-align:center;
+  display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:10.5px; text-align:center;
 }
 .hud .val { font-family:'Anton',sans-serif; font-size:15px; color:var(--chalk-yellow); }
 .hud .lbl { color:var(--chalk-dim); font-size:9px; text-transform:uppercase; letter-spacing:0.06em; }
+.box-strip {
+  display:flex; align-items:baseline; justify-content:center; gap:6px;
+  border:1px dashed rgba(242,240,230,0.3); border-radius:6px; padding:5px 10px; margin-bottom:6px;
+  font-size:10.5px;
+}
+.box-strip .val { font-family:'Anton',sans-serif; font-size:14px; color:var(--chalk-yellow); }
+.box-strip .lbl { color:var(--chalk-dim); font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; }
+.box-strip .vs { color:var(--chalk-dim); font-size:9px; }
 .field-svg { width:100%; height:auto; display:block; margin:4px 0 8px; }
 .yardline { stroke:rgba(242,240,230,0.08); stroke-width:1; stroke-dasharray:4 6; }
 .los { stroke:var(--chalk-yellow); stroke-width:2; stroke-dasharray:2 4; opacity:0.85; }

@@ -9,10 +9,19 @@
 export function personnelFor(formation, callSide, shotgun) {
   const mirror = callSide !== formation.strongDefault;
   return formation.personnel.map((p) => {
-    const x = mirror ? 400 - p.x : p.x;
+    let x = mirror ? 400 - p.x : p.x;
     let y = p.y;
     if (p.r === "QB") y = shotgun ? formation.qbShotgunY : 216;
     else if (y === undefined) y = p.line ? 214 : 232;
+    if (p.gunOffset && shotgun) {
+      // Single-back shotgun sets: the back lines up BESIDE the QB,
+      // not stacked directly in front of him on the same line.
+      // Offset to the weak side (away from formation strength) — a
+      // common convention, though real playbooks vary on this and
+      // sometimes use the offset itself as a pre-snap tell.
+      const dx = 30;
+      x = callSide === "right" ? x - dx : x + dx;
+    }
     return { ...p, x, y };
   });
 }

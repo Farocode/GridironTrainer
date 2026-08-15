@@ -1,6 +1,6 @@
 import { ordinal, fieldPos, fieldZone } from "../engine/utils";
 
-export default function Hud({ down, distance, yardLine, blockers, box }) {
+export default function Hud({ down, distance, yardLine }) {
   return (
     <div className="hud">
       <div>
@@ -10,10 +10,6 @@ export default function Hud({ down, distance, yardLine, blockers, box }) {
       <div>
         <div className="val">{fieldPos(yardLine)}</div>
         <div className="lbl">{fieldZone(yardLine)}</div>
-      </div>
-      <div>
-        <div className="val">{blockers} v {box}</div>
-        <div className="lbl">Blockers v Box</div>
       </div>
     </div>
   );

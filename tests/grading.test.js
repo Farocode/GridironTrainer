@@ -237,11 +237,31 @@ describe("personnelFor — on-line vs off-line receiver depth", () => {
     expect(offLine.y - onLine.y, "gap should be clearly visible, not just non-zero").toBeGreaterThanOrEqual(15);
   });
 
+  test("shotgun sets offset the lone RB beside the QB, not stacked directly in front", () => {
+    // Regression test: the RB always shared the QB's exact x-coordinate,
+    // reading as "the back lined up in front of the QB" in shotgun.
+    for (const id of ["p12", "p11", "p10"]) {
+      const personnel = personnelFor(OFFENSE_FORMATIONS[id], "right", true);
+      const qb = personnel.find((p) => p.r === "QB");
+      const rb = personnel.find((p) => p.r === "RB");
+      expect(Math.abs(rb.x - qb.x), `${id} RB should be offset from QB in shotgun`).toBeGreaterThan(15);
+    }
+  });
+
+  test("under center, the lone RB stays directly behind the QB (no offset) — that alignment is realistic as-is", () => {
+    for (const id of ["p12", "p11", "p10"]) {
+      const personnel = personnelFor(OFFENSE_FORMATIONS[id], "right", false);
+      const qb = personnel.find((p) => p.r === "QB");
+      const rb = personnel.find((p) => p.r === "RB");
+      expect(rb.x, `${id} RB should stay in-line under center`).toBe(qb.x);
+    }
+  });
+
   test("no two personnel markers overlap, for every formation in both postures", () => {
     // Regression test: p20's FB shared the QB's exact x-coordinate and
     // was only 18px away vertically — with 11px-radius circle markers
     // (22px combined), that's a direct visual overlap ("FB lined up in
-    // front of QB").
+    // front of QB"). Also covers the shotgun RB offset added above.
     const RADIUS_SUM = 22;
     for (const [id, f] of Object.entries(OFFENSE_FORMATIONS)) {
       for (const shotgun of [true, false]) {

@@ -191,10 +191,7 @@ export default function App() {
 
         {(phase === "presnap" || phase === "result") && rep && (
           <>
-            <Hud
-              down={down} distance={distance} yardLine={yardLine}
-              blockers={OFFENSE_FORMATIONS[rep.formationId].blockers} box={rep.shown.box}
-            />
+            <Hud down={down} distance={distance} yardLine={yardLine} />
 
             <FieldView
               shown={phase === "presnap" ? rep.shown : rep.actual}
@@ -203,6 +200,14 @@ export default function App() {
               callSide={rep.callSide}
               shotgun={rep.shotgun}
             />
+
+            <div className="box-strip">
+              <span className="val">{OFFENSE_FORMATIONS[rep.formationId].blockers}</span>
+              <span className="lbl">Blockers</span>
+              <span className="vs">v</span>
+              <span className="val">{rep.shown.box}</span>
+              <span className="lbl">Box</span>
+            </div>
 
             {showTips && (
               <div className="readbox">

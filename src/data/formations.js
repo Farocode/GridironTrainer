@@ -16,7 +16,7 @@ export const OFFENSE_FORMATIONS = {
     strengthWord: "TE Strong", strongDefault: "right", shotgunProb: 0.55, qbShotgunY: 270,
     personnel: [
       { x: 200, r: "QB" },
-      { x: 200, y: 246, r: "RB" },
+      { x: 200, y: 246, r: "RB", gunOffset: true },
       { x: 100, r: "TE", line: false },
       { x: 300, r: "TE", line: true },
       { x: 40, r: "WR", line: true },
@@ -40,7 +40,7 @@ export const OFFENSE_FORMATIONS = {
     strengthWord: "Trips", strongDefault: "right", shotgunProb: 0.85, qbShotgunY: 268,
     personnel: [
       { x: 200, r: "QB" },
-      { x: 200, y: 244, r: "RB" },
+      { x: 200, y: 244, r: "RB", gunOffset: true },
       { x: 310, r: "TE", line: true },
       { x: 40, r: "WR", line: true },
       { x: 360, r: "WR", line: true },
@@ -52,7 +52,7 @@ export const OFFENSE_FORMATIONS = {
     strengthWord: "Trips", strongDefault: "right", shotgunProb: 0.95, qbShotgunY: 270,
     personnel: [
       { x: 200, r: "QB" },
-      { x: 200, y: 246, r: "RB" },
+      { x: 200, y: 246, r: "RB", gunOffset: true },
       { x: 20, r: "WR", line: true },
       { x: 260, r: "WR", line: false },
       { x: 320, r: "WR", line: false },
