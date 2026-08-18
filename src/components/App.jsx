@@ -114,16 +114,33 @@ export default function App() {
     const { callType, actual, formationId, callSide } = rep;
     let tier, explain;
 
-    if (callType === "run") {
-      const g = gradeRun(chosen, actual.box, OFFENSE_FORMATIONS[formationId].blockers, actual.stackSide, callSide);
-      tier = g.tier;
-      explain = runExplain(variant, { ...g, chosen });
-    } else {
-      const prio = priorityList(actual.mofo, actual.press, actual.blitz);
-      const g = gradePass(chosen, prio, yardLine, down, distance, rep.concept.depths);
-      tier = g.tier;
-      explain = passExplain(variant, term, g, actual.mofo, actual.press, actual.blitz, label);
+    try {
+      if (callType === "run") {
+        const g = gradeRun(chosen, actual.box, OFFENSE_FORMATIONS[formationId].blockers, actual.stackSide, callSide);
+        tier = g.tier;
+        explain = runExplain(variant, { ...g, chosen });
+      } else {
+        const prio = priorityList(actual.mofo, actual.press, actual.blitz);
+        const g = gradePass(chosen, prio, yardLine, down, distance, rep.concept.depths);
+        tier = g.tier;
+        explain = passExplain(variant, term, g, actual.mofo, actual.press, actual.blitz, label);
+      }
+    } catch (err) {
+      // Grading threw on this rep's specific data combination. Rather
+      // than freezing on a dead onClick (error boundaries don't catch
+      // handler errors — see main.jsx), surface it as an ungraded rep
+      // the player can move past. Doesn't touch down/distance/yardLine
+      // since we never got a valid tier to apply progress from.
+      console.error("Grading failed for this rep:", err, { chosen, rep });
+      setResult({
+        tier: "Ungraded",
+        explain: "Couldn't grade that one \u2014 no harm done, doesn't count against you. On to the next rep.",
+        driveNote: null,
+      });
+      setPhase("result");
+      return;
     }
+
 
     const { gain, turnover, newYardLine } = applyProgress(tier, callType, chosen);
     setStats((s) => ({ ...s, [tier]: s[tier] + 1 }));

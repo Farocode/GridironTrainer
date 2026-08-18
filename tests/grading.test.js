@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { gradeRun, gradePass, priorityList } from "../src/engine/grading.js";
-import { computeBox, personnelFor } from "../src/engine/formationMath.js";
+import { computeBox, personnelFor, safetyPositions } from "../src/engine/formationMath.js";
 import { OFFENSE_FORMATIONS } from "../src/data/formations.js";
 import { PASS_CONCEPTS } from "../src/data/concepts.js";
 
@@ -283,8 +283,40 @@ describe("personnelFor — on-line vs off-line receiver depth", () => {
     // above y=100, leaving ~100px of empty chalkboard at the top on
     // every single rep. The canvas is now 295 tall with the
     // shallowest safety around y=18-26.
-    const shallowestSafetyY = 18; // single-high (MOFC) case
-    expect(shallowestSafetyY).toBeLessThan(40);
+    //
+    // Pulls the real computed y-coordinates from safetyPositions()
+    // (src/engine/formationMath.js) rather than a hardcoded literal,
+    // so this actually catches someone shifting the safety depth in
+    // the geometry file itself, not just re-asserting a comment.
+    const mofc = safetyPositions({ mofo: false, blitz: false });
+    const mofo = safetyPositions({ mofo: true, blitz: false });
+    const allYs = [...mofc, ...mofo].map((s) => s.y);
+    const shallowestSafetyY = Math.min(...allYs);
+    expect(shallowestSafetyY, `computed shallowest safety y=${shallowestSafetyY}`).toBeLessThan(40);
+  });
+
+  test("MOFC single-high safety sits shallower than MOFO split safeties", () => {
+    // The single-high safety in MOFC has to cover the whole deep
+    // middle alone, so it plays shallower than either safety in a
+    // two-deep MOFO split — that's the actual football reason MOFC
+    // is the shallowest-defender case tested above, not a coincidence.
+    const mofc = safetyPositions({ mofo: false, blitz: false });
+    const mofo = safetyPositions({ mofo: true, blitz: false });
+    expect(mofc[0].y).toBeLessThan(mofo[0].y);
+  });
+
+  test("blitz shells have no safeties (all support has rotated down)", () => {
+    const blitzed = safetyPositions({ mofo: false, blitz: true });
+    expect(blitzed).toHaveLength(0);
+  });
+
+  test("nudge offset applies to the targeted safety index only", () => {
+    const nudge = { index: 0, dx: 40, dy: -13 };
+    const [s0, s1] = safetyPositions({ mofo: true, blitz: false }, nudge);
+    expect(s0.x).toBe(150 + 40);
+    expect(s0.y).toBe(26 - 13);
+    expect(s0.tell).toBe(true);
+    expect(s1.tell).toBeUndefined();
   });
 });
 

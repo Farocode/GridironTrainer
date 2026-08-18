@@ -45,6 +45,28 @@ export function computeBox(mofoActual, boxBias, blitz, randInt) {
 
 
 /**
+ * Safety positions for the shell being rendered. MOFC (single-high)
+ * sits shallower than MOFO (two-deep split) because there's only one
+ * body to cover the deep middle. `nudge` applies the disguise-tell
+ * visual offset to one safety (see App.jsx `drawRep`) and is optional.
+ *
+ * Pulled out of FieldView.jsx so the actual on-screen geometry is a
+ * pure function tests can call directly, instead of coordinates
+ * living only inline in JSX (see tests/grading.test.js "no dead
+ * space" regression test).
+ */
+export function safetyPositions(shown, nudge) {
+  const base = shown.blitz
+    ? []
+    : shown.mofo
+    ? [{ x: 150, y: 26, role: "S" }, { x: 250, y: 26, role: "S" }]
+    : [{ x: 200, y: 18, role: "S" }];
+  return base.map((s, i) =>
+    nudge && nudge.index === i ? { ...s, x: s.x + nudge.dx, y: s.y + nudge.dy, tell: true } : s
+  );
+}
+
+/**
  * Positions linebackers near the line of scrimmage, shifted left or
  * right to visually represent which side the extra box defender(s)
  * are stacked toward. This is the ONLY place stackSide is expressed —

@@ -1,5 +1,5 @@
 import { OFFENSE_FORMATIONS } from "../data/formations";
-import { personnelFor, lbPositions } from "../engine/formationMath";
+import { personnelFor, lbPositions, safetyPositions } from "../engine/formationMath";
 
 /**
  * Renders the pre-snap (or post-snap "actual") defensive look plus
@@ -11,14 +11,7 @@ export default function FieldView({ shown, nudge, formationId, callSide, shotgun
   const formation = OFFENSE_FORMATIONS[formationId];
   const personnel = personnelFor(formation, callSide, shotgun);
 
-  const safeties = shown.blitz
-    ? []
-    : shown.mofo
-    ? [{ x: 150, y: 26, role: "S" }, { x: 250, y: 26, role: "S" }]
-    : [{ x: 200, y: 18, role: "S" }];
-  const safetiesN = safeties.map((s, i) =>
-    nudge && nudge.index === i ? { ...s, x: s.x + nudge.dx, y: s.y + nudge.dy, tell: true } : s
-  );
+  const safetiesN = safetyPositions(shown, nudge);
   const corners = [
     { x: 50, y: shown.press ? 180 : 140, role: "CB" },
     { x: 350, y: shown.press ? 180 : 140, role: "CB" },

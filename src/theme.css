@@ -73,6 +73,7 @@ h1.title { font-family:'Anton',sans-serif; letter-spacing:0.03em; font-size:23px
   background:rgba(242,240,230,0.06); border:1px solid rgba(242,240,230,0.3); border-radius:6px;
   padding:10px 8px; color:var(--chalk); font-family:'Space Mono',monospace; font-size:12px; cursor:pointer;
   text-align:left; transition:background 0.15s, transform 0.1s;
+  min-height:44px; display:flex; flex-direction:column; justify-content:center;
 }
 .btn:hover { background:rgba(242,240,230,0.14); }
 .btn:active { transform:scale(0.98); }
