@@ -2,7 +2,7 @@
 
 .board-wrap {
   --board:#17332c; --board-dark:#0f221c; --chalk:#f2f0e6; --chalk-dim:rgba(242,240,230,0.5);
-  --chalk-yellow:#e8c547; --chalk-red:#d06a58; --chalk-green:#9fd8a8; --frame:#6b4a34;
+  --chalk-yellow:#e8c547; --chalk-red:#d1719a; --chalk-green:#9fd8a8; --frame:#6b4a34;
   font-family:'Space Mono',monospace; color:var(--chalk);
   width: 100%;
   max-width: 430px;

@@ -61,7 +61,15 @@ export const OFFENSE_FORMATIONS = {
   },
   p20: {
     name: "20 Personnel", desc: "2 RB, 0 TE \u2014 flexbone", blockers: 6,
-    strengthWord: "Wing Strong", strongDefault: "right", shotgunProb: 0.5, qbShotgunY: 274,
+    // shotgunProb is 0, not an oversight: flexbone's FB mesh point
+    // requires the QB under center. There's no real shotgun version
+    // of this personnel grouping. (An earlier version of this data
+    // set shotgunProb: 0.5 with the FB left at x=200 same as the QB
+    // \u2014 that's what produced the "FB stacked in front of the QB"
+    // bug; the real fix is that this alignment shouldn't generate at
+    // all, not offsetting the FB to a position flexbone never uses.)
+    // qbShotgunY is kept for schema consistency in case that changes.
+    strengthWord: "Wing Strong", strongDefault: "right", shotgunProb: 0, qbShotgunY: 274,
     personnel: [
       { x: 200, r: "QB" },
       { x: 200, y: 246, r: "FB" },

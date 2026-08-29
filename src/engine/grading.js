@@ -113,6 +113,7 @@ export const RUN_PHRASES = {
   bad_keep_should_flip: [
     (n) => `Ran right into the extra defender (${n}). That deficit was there before the snap.`,
     (n) => `You kept it into the loaded side (${n}). The stack was visible pre-snap.`,
+    (n) => `Wrong side to stay on \u2014 the numbers advantage was clearly on the other side (${n}).`,
   ],
   bad_keep_should_rpo: [
     (n) => `Box was stacked everywhere (${n}). No run answer here \u2014 needed to get it out.`,
@@ -144,18 +145,27 @@ export const PASS_PHRASES = {
     (fam, w) => `${fam} \u2014 ${w} was the window. Good process.`,
     (fam, w) => `${fam}. That's textbook ${w.toLowerCase()} \u2014 well read.`,
     (fam, w) => `${fam}. Correct depth: ${w.toLowerCase()}. Nice process.`,
+    (fam, w) => `${fam} \u2014 read it before the snap and got to ${w.toLowerCase()}. That's the process working.`,
   ],
   coverage_read: [
     (fam, w, c) => `${fam} takes ${c} away. That's throwing right into their strength.`,
     (fam, w, c) => `${fam} \u2014 ${c} is exactly what that shell is built to stop.`,
+    (fam, w, c) => `${fam} \u2014 that's forcing it into exactly the window they took away.`,
   ],
   conservative: [
     (fam, w, c) => `${w} was the higher-value read, but ${c} wasn't a bad process \u2014 just conservative.`,
     (fam, w, c) => `Not wrong, just leaves value out there. ${w} was there for the taking.`,
+    (fam, w) => `Safe pick. You secured positive yardage, but ${w.toLowerCase()} was open underneath it.`,
+    (fam, w) => `Conservative call \u2014 kept the drive moving, but ${w.toLowerCase()} was there for the taking.`,
+    (fam, w) => `Low-risk pick, and there's nothing wrong with that. Just know ${w.toLowerCase()} was on the table.`,
   ],
-  situational: [
-    () => `Given the down and distance, that needed more than it could reasonably get \u2014 but the read itself wasn't wrong.`,
-    () => `Reasonable read, just short of what the situation demanded.`,
+  situational_pressure: [
+    (fam, w, c) => `Held it against an all-out blitz to throw ${c.toLowerCase()} \u2014 the extra rusher was live the whole time that took to develop. That's the real risk, not the read direction.`,
+    (fam, w, c) => `${w} would've gotten it out before the rush arrived. Sitting in the pocket that long into a blitz is what's exposed here.`,
+  ],
+  situational_distance: [
+    (fam, w, c) => `The read direction wasn't wrong, but ${c.toLowerCase()} doesn't reliably reach the sticks here \u2014 down and distance needed more depth than that.`,
+    (fam, w, c) => `Right idea, not enough of it. That depth is short of what this down and distance actually calls for.`,
   ],
   field_position: [
     () => `No room to throw it deep from here, regardless of coverage \u2014 that's a boundary mistake, not a read mistake.`,
@@ -170,5 +180,12 @@ export function passExplain(pickVariant, term, g, mofo, press, blitz, chosenLabe
   if (g.tier === "Ideal") return pickVariant("pass_ideal", PASS_PHRASES.ideal)(fam, idealLabel);
   if (g.reason === "coverage_read") return pickVariant("pass_cov", PASS_PHRASES.coverage_read)(fam, idealLabel, chosenLabel);
   if (g.reason === "conservative") return pickVariant("pass_cons", PASS_PHRASES.conservative)(fam, idealLabel, chosenLabel);
-  return pickVariant("pass_sit", PASS_PHRASES.situational)();
+  // "situational" used to be one generic bucket ("that needed more
+  // than it could reasonably get") regardless of WHY the pick fell
+  // short. Split by mechanism: holding the ball into a live blitz is
+  // a pressure-exposure risk; anywhere else it's a down/distance
+  // shortfall. Different coaching point, different sentence.
+  return blitz
+    ? pickVariant("pass_sit_pressure", PASS_PHRASES.situational_pressure)(fam, idealLabel, chosenLabel)
+    : pickVariant("pass_sit_distance", PASS_PHRASES.situational_distance)(fam, idealLabel, chosenLabel);
 }
