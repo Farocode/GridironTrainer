@@ -226,6 +226,20 @@ export default function App() {
               <span className="lbl">Box</span>
             </div>
 
+            {phase === "result" && rep.callType === "run" && (() => {
+              // Revealed post-result only \u2014 pre-snap, stack side stays
+              // the pure visual read (LB x-shift) it's designed to be.
+              const diff = rep.actual.box - OFFENSE_FORMATIONS[rep.formationId].blockers;
+              if (diff <= 0) return null;
+              const intoCallSide = rep.actual.stackSide === rep.callSide;
+              return (
+                <div className="stack-flag-row">
+                  <span className="badge">+{diff} stacked {rep.actual.stackSide}</span>
+                  <span className="note">{intoCallSide ? "\u2014 into the call side" : "\u2014 away from the call side"}</span>
+                </div>
+              );
+            })()}
+
             {showTips && (
               <div className="readbox">
                 <b>Shell:</b> {shownFamily}. <b>Personnel:</b> {OFFENSE_FORMATIONS[rep.formationId].name} ({OFFENSE_FORMATIONS[rep.formationId].strengthWord} {rep.callSide === "left" ? "Left" : "Right"}).

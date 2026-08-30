@@ -53,12 +53,31 @@ h1.title { font-family:'Anton',sans-serif; letter-spacing:0.03em; font-size:23px
 .offense .skill { fill:var(--chalk-yellow); opacity:0.85; }
 .skill-label { fill:var(--board-dark); font-size:8px; font-weight:bold; }
 .defender { fill:none; stroke:var(--chalk); stroke-width:2; }
-.dl-mark { fill:none; stroke:var(--chalk); stroke-width:1.6; opacity:0.55; }
+/* Was opacity 0.55 with no text label at all \u2014 easy to undercount
+   against the labeled CB/LB/S circles. Bumped to match the DL's actual
+   weight in the box count, and a small DL label was added below each
+   mark (see FieldView.jsx) so all 7 (or however many) box defenders
+   are as countable as the rest of the front. */
+.dl-mark { fill:none; stroke:var(--chalk); stroke-width:1.8; opacity:0.85; }
+.dl-label { fill:var(--chalk-dim); font-size:6.5px; letter-spacing:0.03em; }
 .defender-blitz { stroke:var(--chalk-red); }
 .defender-label { fill:var(--chalk); font-size:9px; }
 .tell-ring { fill:none; stroke:rgba(242,240,230,0.35); stroke-width:1; stroke-dasharray:2 3; }
 .blitz-arrow { stroke:var(--chalk-red); stroke-width:2; fill:none; opacity:0.85; }
 .arrowhead { fill:var(--chalk-red); }
+/* Post-result only, run plays only (App.jsx): flags which side the
+   box's extra, unaccounted-for defender(s) were stacked toward, so a
+   "keep despite box > blockers" grade explains itself instead of
+   just repeating numbers that look backwards on their own. Pre-snap
+   this stays a pure visual read (LB x-shift, no label) by design \u2014
+   see README "Known simplifications". */
+.stack-flag-row {
+  display:flex; align-items:baseline; justify-content:center; gap:6px;
+  border:1px dashed rgba(209,113,154,0.5); border-radius:6px; padding:5px 10px; margin-bottom:6px;
+  font-size:10.5px; color:var(--chalk-red);
+}
+.stack-flag-row .badge { font-family:'Anton',sans-serif; font-size:12px; letter-spacing:0.02em; }
+.stack-flag-row .note { color:var(--chalk-dim); font-size:9.5px; }
 .readbox {
   border:1px dashed rgba(242,240,230,0.3); border-radius:6px; padding:8px 10px; font-size:11.5px;
   color:var(--chalk-dim); margin-bottom:8px;

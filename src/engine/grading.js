@@ -45,10 +45,28 @@ export function familyLabel(term, mofo, press, blitz) {
  */
 export function gradeRun(chosen, box, blockers, stackSide, strongSide) {
   const diff = box - blockers;
-  let ideal;
-  if (diff <= 0) ideal = "keep";
-  else if (diff >= 2) ideal = "rpohot"; // overloaded everywhere, no side fixes it
-  else ideal = stackSide === strongSide ? "killflip" : "keep";
+  // `reason` records WHY `ideal` came out the way it did, distinct
+  // from `ideal` itself, so the feedback copy (runExplain) can name
+  // the actual mechanism instead of just restating the raw box vs.
+  // blockers numbers. That matters most for "stacked_back": diff is
+  // 1 (box > blockers, which on its own reads as bad for the run),
+  // but the extra man is stacked away from the call side, so the
+  // play side itself is still clean \u2014 "keep" is still correct, and
+  // the explanation needs to say so or it looks like a contradiction.
+  let ideal, reason;
+  if (diff <= 0) {
+    ideal = "keep";
+    reason = "clean";
+  } else if (diff >= 2) {
+    ideal = "rpohot"; // overloaded everywhere, no side fixes it
+    reason = "overloaded";
+  } else if (stackSide === strongSide) {
+    ideal = "killflip";
+    reason = "stacked_strong";
+  } else {
+    ideal = "keep";
+    reason = "stacked_back";
+  }
 
   let tier;
   if (chosen === ideal) tier = "Ideal";
@@ -56,7 +74,7 @@ export function gradeRun(chosen, box, blockers, stackSide, strongSide) {
   else if (ideal === "killflip") tier = chosen === "rpohot" ? "Acceptable" : "Misread";
   else tier = "Misread";
 
-  return { tier, ideal, diff, box, blockers, stacked: diff >= 1 };
+  return { tier, ideal, diff, box, blockers, stacked: diff >= 1, reason, stackSide, strongSide };
 }
 
 /**
@@ -130,7 +148,16 @@ export const RUN_PHRASES = {
 };
 
 export function runExplain(pickVariant, g) {
-  const n = `${g.box} in the box vs ${g.blockers} blockers`;
+  // Base numbers, enriched with WHY when the raw comparison alone
+  // would read as backwards (diff === 1, extra man stacked away
+  // from the call side \u2014 "keep" is still right, but "7 in the box
+  // vs 6 blockers" on its own looks like it argues the opposite way).
+  const base = `${g.box} in the box vs ${g.blockers} blockers`;
+  const n = g.reason === "stacked_back"
+    ? `${base}, but the extra man was stacked ${g.stackSide} \u2014 away from your ${g.strongSide} call side, so that side stayed clean`
+    : g.reason === "stacked_strong"
+    ? `${base}, stacked right into your ${g.strongSide} call side`
+    : base;
   if (g.tier === "Ideal") return pickVariant(`run_ideal_${g.ideal}`, RUN_PHRASES[`ideal_${g.ideal}`])(n);
   if (g.tier === "Acceptable") {
     return pickVariant(`run_acc_${g.ideal}`, g.ideal === "keep" ? RUN_PHRASES.acc_keep_over_flip : RUN_PHRASES.acc_flip_over_rpo)(n);

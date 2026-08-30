@@ -63,7 +63,10 @@ export default function FieldView({ shown, nudge, formationId, callSide, shotgun
 
       <g filter="url(#chalkRough)" className="dline">
         {[162, 188, 212, 238].map((x) => (
-          <rect key={x} x={x - 6} y="194" width="12" height="8" className="dl-mark" />
+          <g key={x}>
+            <rect x={x - 6} y="194" width="12" height="8" className="dl-mark" />
+            <text x={x} y="191" textAnchor="middle" className="dl-label">DL</text>
+          </g>
         ))}
       </g>
 
