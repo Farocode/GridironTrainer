@@ -21,7 +21,15 @@ export default function FieldView({ shown, nudge, formationId, callSide, shotgun
   const defenders = [...safetiesN, ...corners, ...lbs];
 
   return (
-    <svg viewBox="0 -18 400 313" className="field-svg" role="img" aria-label="defensive look">
+    // viewBox bottom was 313 (295 field + the -18 top margin), but
+    // nothing ever draws past y=243 (deepest off-line receiver, y=232,
+    // +11 radius) — that was 52 units (~17%) of pure blank chalkboard
+    // baked into every render, inflating the SVG's rendered height on
+    // narrow viewports and forcing a scroll to see the whole board on
+    // phones. Trimmed to 268 (243 + a little breathing room). Top
+    // margin (-18) is untouched — it's sized for the disguise
+    // tell-ring's worst case (nudged safety + r=19 ring), not slack.
+    <svg viewBox="0 -18 400 268" className="field-svg" role="img" aria-label="defensive look">
       <defs>
         <filter id="chalkRough" x="-20%" y="-20%" width="140%" height="140%">
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />

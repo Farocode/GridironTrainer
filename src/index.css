@@ -5,6 +5,23 @@
   box-sizing: border-box;
 }
 
+/* Desktop mode: every font-size/padding/gap/dimension value in
+   theme.css is in rem, keyed off THIS root font-size (62.5% = 1rem
+   exactly 10px, so a px value in the old design is just /10 in rem —
+   easy to eyeball and easy to re-derive). Bumping the root font-size
+   at one breakpoint scales the whole board together, instead of the
+   earlier fixed-px design where a wider viewport just left more empty
+   chalkboard around the same small text (board stays portrait/vertical
+   by design — see README — this only changes scale, not orientation). */
+html {
+  font-size: 62.5%;
+}
+@media (min-width: 900px) {
+  html {
+    font-size: 85%; /* ~1.36x: board-wrap's 43rem max-width becomes ~585px instead of 430px */
+  }
+}
+
 html, body {
   margin: 0;
   padding: 0;

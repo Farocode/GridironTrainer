@@ -1,50 +1,68 @@
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&display=swap');
 
+/* Below this point, every font-size/padding/margin/gap/width/height/
+   border-radius value is in rem, not px (SVG-internal classes near
+   the bottom are the deliberate exception — see their comment). 1rem
+   = 10px at the base root font-size set in index.css, so a rem value
+   here is just the old px value /10. That's what lets the single
+   breakpoint in index.css scale the whole board together for desktop
+   mode instead of a fixed-px design that only got MORE empty
+   chalkboard on a wider screen. */
+
 .board-wrap {
-  --board:#17332c; --board-dark:#0f221c; --chalk:#f2f0e6; --chalk-dim:rgba(242,240,230,0.5);
+  --board:#17332c; --board-dark:#0f221c; --chalk:#f2f0e6; --chalk-dim:rgba(242,240,230,0.72);
   --chalk-yellow:#e8c547; --chalk-red:#d1719a; --chalk-green:#9fd8a8; --frame:#6b4a34;
   font-family:'Space Mono',monospace; color:var(--chalk);
   width: 100%;
-  max-width: 430px;
+  max-width: 43rem;
   /* Fixed frame size (like a phone screen) instead of hugging whatever
      content is showing — this is the actual fix for the frame growing/
      shrinking between the setup, presnap, and result screens.
      100dvh (not 100vh) so it doesn't jump when a mobile browser's
      address bar shows/hides. */
-  height: min(100dvh - 24px, 860px);
-  max-height: 860px;
+  height: min(100dvh - 2.4rem, 86rem);
+  max-height: 86rem;
   display: flex;
   flex-direction: column;
-  padding:14px;
-  background:var(--frame); border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,0.35);
+  padding:1.4rem;
+  background:var(--frame); border-radius:1.4rem; box-shadow:0 0.8rem 2.4rem rgba(0,0,0,0.35);
   overflow: hidden;
 }
 .inner {
   background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.03), transparent 40%),
     radial-gradient(circle at 80% 85%, rgba(255,255,255,0.03), transparent 40%), var(--board);
-  border-radius:8px; padding:12px 14px 14px;
+  border-radius:0.8rem; padding:1.2rem 1.4rem 1.4rem;
   flex: 1;
   min-height: 0; /* required for the flex child to actually scroll instead of overflowing */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-h1.title { font-family:'Anton',sans-serif; letter-spacing:0.03em; font-size:23px; margin:0 0 2px; color:var(--chalk); }
-.subtitle { font-size:11px; color:var(--chalk-dim); margin-bottom:8px; line-height:1.5; }
+h1.title { font-family:'Anton',sans-serif; letter-spacing:0.03em; font-size:2.3rem; margin:0 0 0.2rem; color:var(--chalk); }
+.subtitle { font-size:1.1rem; color:var(--chalk-dim); margin-bottom:0.8rem; line-height:1.5; }
 .hud {
-  border:1px solid rgba(242,240,230,0.25); border-radius:6px; padding:8px 10px; margin-bottom:8px;
-  display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:10.5px; text-align:center;
+  border:1px solid rgba(242,240,230,0.25); border-radius:0.6rem; padding:0.8rem 1rem; margin-bottom:0.8rem;
+  display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; font-size:1.05rem; text-align:center;
 }
-.hud .val { font-family:'Anton',sans-serif; font-size:15px; color:var(--chalk-yellow); }
-.hud .lbl { color:var(--chalk-dim); font-size:9px; text-transform:uppercase; letter-spacing:0.06em; }
+.hud .val { font-family:'Anton',sans-serif; font-size:1.5rem; color:var(--chalk-yellow); }
+.hud .lbl { color:var(--chalk-dim); font-size:0.9rem; text-transform:uppercase; letter-spacing:0.06em; }
 .box-strip {
-  display:flex; align-items:baseline; justify-content:center; gap:6px;
-  border:1px dashed rgba(242,240,230,0.3); border-radius:6px; padding:5px 10px; margin-bottom:6px;
-  font-size:10.5px;
+  display:flex; align-items:baseline; justify-content:center; gap:0.6rem;
+  border:1px dashed rgba(242,240,230,0.3); border-radius:0.6rem; padding:0.5rem 1rem; margin-bottom:0.6rem;
+  font-size:1.05rem;
 }
-.box-strip .val { font-family:'Anton',sans-serif; font-size:14px; color:var(--chalk-yellow); }
-.box-strip .lbl { color:var(--chalk-dim); font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; }
-.box-strip .vs { color:var(--chalk-dim); font-size:9px; }
-.field-svg { width:100%; height:auto; display:block; margin:4px 0 8px; }
+.box-strip .val { font-family:'Anton',sans-serif; font-size:1.4rem; color:var(--chalk-yellow); }
+.box-strip .lbl { color:var(--chalk-dim); font-size:0.95rem; text-transform:uppercase; letter-spacing:0.05em; }
+.box-strip .vs { color:var(--chalk-dim); font-size:0.9rem; }
+.field-svg { width:100%; height:auto; display:block; margin:0.4rem 0 0.8rem; }
+/* --- SVG-internal classes: these apply to elements drawn inside
+   FieldView's <svg viewBox="..."> and their font-size/stroke-width
+   values are SVG USER UNITS, not real CSS pixels — the viewBox
+   transform (not the root font-size) is what scales them, together
+   with every other coordinate in the diagram, as the SVG is resized.
+   Converting these to rem would break that: it would fix their size
+   in real screen pixels while the rest of the diagram's geometry kept
+   scaling with the viewBox, throwing the whole picture out of
+   proportion. Left in px on purpose. */
 .yardline { stroke:rgba(242,240,230,0.08); stroke-width:1; stroke-dasharray:4 6; }
 .los { stroke:var(--chalk-yellow); stroke-width:2; stroke-dasharray:2 4; opacity:0.85; }
 .los-label { fill:var(--chalk-dim); font-size:9px; letter-spacing:0.15em; }
@@ -53,7 +71,7 @@ h1.title { font-family:'Anton',sans-serif; letter-spacing:0.03em; font-size:23px
 .offense .skill { fill:var(--chalk-yellow); opacity:0.85; }
 .skill-label { fill:var(--board-dark); font-size:8px; font-weight:bold; }
 .defender { fill:none; stroke:var(--chalk); stroke-width:2; }
-/* Was opacity 0.55 with no text label at all \u2014 easy to undercount
+/* Was opacity 0.55 with no text label at all — easy to undercount
    against the labeled CB/LB/S circles. Bumped to match the DL's actual
    weight in the box count, and a small DL label was added below each
    mark (see FieldView.jsx) so all 7 (or however many) box defenders
@@ -65,73 +83,75 @@ h1.title { font-family:'Anton',sans-serif; letter-spacing:0.03em; font-size:23px
 .tell-ring { fill:none; stroke:rgba(242,240,230,0.35); stroke-width:1; stroke-dasharray:2 3; }
 .blitz-arrow { stroke:var(--chalk-red); stroke-width:2; fill:none; opacity:0.85; }
 .arrowhead { fill:var(--chalk-red); }
+/* --- back to normal CSS layout (rem), everything below is regular
+   DOM, not SVG-internal. --- */
 /* Post-result only, run plays only (App.jsx): flags which side the
    box's extra, unaccounted-for defender(s) were stacked toward, so a
    "keep despite box > blockers" grade explains itself instead of
    just repeating numbers that look backwards on their own. Pre-snap
-   this stays a pure visual read (LB x-shift, no label) by design \u2014
+   this stays a pure visual read (LB x-shift, no label) by design —
    see README "Known simplifications". */
 .stack-flag-row {
-  display:flex; align-items:baseline; justify-content:center; gap:6px;
-  border:1px dashed rgba(209,113,154,0.5); border-radius:6px; padding:5px 10px; margin-bottom:6px;
-  font-size:10.5px; color:var(--chalk-red);
+  display:flex; align-items:baseline; justify-content:center; gap:0.6rem;
+  border:1px dashed rgba(209,113,154,0.5); border-radius:0.6rem; padding:0.5rem 1rem; margin-bottom:0.6rem;
+  font-size:1.05rem; color:var(--chalk-red);
 }
-.stack-flag-row .badge { font-family:'Anton',sans-serif; font-size:12px; letter-spacing:0.02em; }
-.stack-flag-row .note { color:var(--chalk-dim); font-size:9.5px; }
+.stack-flag-row .badge { font-family:'Anton',sans-serif; font-size:1.2rem; letter-spacing:0.02em; }
+.stack-flag-row .note { color:var(--chalk-dim); font-size:0.95rem; }
 .readbox {
-  border:1px dashed rgba(242,240,230,0.3); border-radius:6px; padding:8px 10px; font-size:11.5px;
-  color:var(--chalk-dim); margin-bottom:8px;
+  border:1px dashed rgba(242,240,230,0.3); border-radius:0.6rem; padding:0.8rem 1rem; font-size:1.15rem;
+  color:var(--chalk-dim); margin-bottom:0.8rem;
 }
 .readbox b { color:var(--chalk); }
-.called-banner { text-align:center; font-size:11px; color:var(--chalk-dim); margin-bottom:2px; }
-.called-banner .play { font-family:'Anton',sans-serif; font-size:15px; color:var(--chalk-yellow); letter-spacing:0.02em; }
-.concept-blurb { text-align:center; font-size:10px; color:var(--chalk-dim); font-style:italic; margin-bottom:6px; }
-.urgent-flag { text-align:center; font-size:10px; color:var(--chalk-red); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.08em; }
-.btn-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px; }
+.called-banner { text-align:center; font-size:1.1rem; color:var(--chalk-dim); margin-bottom:0.2rem; }
+.called-banner .play { font-family:'Anton',sans-serif; font-size:1.5rem; color:var(--chalk-yellow); letter-spacing:0.02em; }
+.concept-blurb { text-align:center; font-size:1rem; color:var(--chalk-dim); font-style:italic; margin-bottom:0.6rem; }
+.urgent-flag { text-align:center; font-size:1rem; color:var(--chalk-red); margin-bottom:0.6rem; text-transform:uppercase; letter-spacing:0.08em; }
+.btn-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; margin-top:0.4rem; }
 .btn {
-  background:rgba(242,240,230,0.06); border:1px solid rgba(242,240,230,0.3); border-radius:6px;
-  padding:10px 8px; color:var(--chalk); font-family:'Space Mono',monospace; font-size:12px; cursor:pointer;
+  background:rgba(242,240,230,0.06); border:1px solid rgba(242,240,230,0.3); border-radius:0.6rem;
+  padding:1rem 0.8rem; color:var(--chalk); font-family:'Space Mono',monospace; font-size:1.2rem; cursor:pointer;
   text-align:left; transition:background 0.15s, transform 0.1s;
-  min-height:44px; display:flex; flex-direction:column; justify-content:center;
+  min-height:4.4rem; display:flex; flex-direction:column; justify-content:center;
 }
 .btn:hover { background:rgba(242,240,230,0.14); }
 .btn:active { transform:scale(0.98); }
-.btn .hint { display:block; font-size:9.5px; color:var(--chalk-dim); margin-top:2px; }
-.btn-full { width:100%; text-align:left; margin-bottom:8px; }
+.btn .hint { display:block; font-size:0.95rem; color:var(--chalk-dim); margin-top:0.2rem; }
+.btn-full { width:100%; text-align:left; margin-bottom:0.8rem; }
 .result-panel {
-  border-left:3px solid var(--chalk-yellow); padding:10px 12px; background:rgba(242,240,230,0.05);
-  border-radius:4px; margin-bottom:10px;
+  border-left:3px solid var(--chalk-yellow); padding:1rem 1.2rem; background:rgba(242,240,230,0.05);
+  border-radius:0.4rem; margin-bottom:1rem;
 }
 .result-panel.Ideal { border-left-color:var(--chalk-green); }
 .result-panel.Misread { border-left-color:var(--chalk-red); }
-.result-panel .tier { font-family:'Anton',sans-serif; font-size:18px; letter-spacing:0.03em; }
+.result-panel .tier { font-family:'Anton',sans-serif; font-size:1.8rem; letter-spacing:0.03em; }
 .result-panel.Ideal .tier { color:var(--chalk-green); }
 .result-panel.Acceptable .tier { color:var(--chalk-yellow); }
 .result-panel.Misread .tier { color:var(--chalk-red); }
-.result-panel .text { font-size:12px; margin-top:5px; color:var(--chalk); line-height:1.5; }
-.result-panel .drivenote { font-size:10.5px; margin-top:6px; color:var(--chalk-dim); font-style:italic; }
+.result-panel .text { font-size:1.2rem; margin-top:0.5rem; color:var(--chalk); line-height:1.5; }
+.result-panel .drivenote { font-size:1.05rem; margin-top:0.6rem; color:var(--chalk-dim); font-style:italic; }
 .btn-continue {
-  width:100%; background:var(--chalk-yellow); color:var(--board-dark); border:none; border-radius:6px;
-  padding:11px; font-family:'Anton',sans-serif; font-size:14px; letter-spacing:0.03em; cursor:pointer;
+  width:100%; background:var(--chalk-yellow); color:var(--board-dark); border:none; border-radius:0.6rem;
+  padding:1.1rem; font-family:'Anton',sans-serif; font-size:1.4rem; letter-spacing:0.03em; cursor:pointer;
 }
-.toggle-row { display:flex; align-items:center; gap:6px; font-size:10.5px; color:var(--chalk-dim); margin:6px 0 4px; }
+.toggle-row { display:flex; align-items:center; gap:0.6rem; font-size:1.05rem; color:var(--chalk-dim); margin:0.6rem 0 0.4rem; }
 .toggle-row input { accent-color:var(--chalk-yellow); }
 .log {
-  margin-top:8px; border-top:1px solid rgba(242,240,230,0.15); padding-top:6px; max-height:90px;
-  overflow-y:auto; font-size:10.5px; line-height:1.6;
+  margin-top:0.8rem; border-top:1px solid rgba(242,240,230,0.15); padding-top:0.6rem; max-height:9rem;
+  overflow-y:auto; font-size:1.05rem; line-height:1.6;
 }
 .log-entry.good { color:var(--chalk-green); }
 .log-entry.bad { color:var(--chalk-red); }
 .log-entry.neutral { color:var(--chalk-dim); }
-.scout-card { border:1px solid rgba(242,240,230,0.25); border-radius:6px; padding:12px; margin-bottom:12px; }
-.scout-card h3 { font-family:'Anton',sans-serif; font-size:16px; color:var(--chalk-yellow); margin:0 0 6px; }
-.scout-card p { font-size:12px; line-height:1.6; margin:0 0 8px; color:var(--chalk); }
-.term-row { display:flex; gap:6px; margin-bottom:10px; }
+.scout-card { border:1px solid rgba(242,240,230,0.25); border-radius:0.6rem; padding:1.2rem; margin-bottom:1.2rem; }
+.scout-card h3 { font-family:'Anton',sans-serif; font-size:1.6rem; color:var(--chalk-yellow); margin:0 0 0.6rem; }
+.scout-card p { font-size:1.2rem; line-height:1.6; margin:0 0 0.8rem; color:var(--chalk); }
+.term-row { display:flex; gap:0.6rem; margin-bottom:1rem; }
 .term-row button { flex:1; }
 .term-row .active { background:rgba(232,197,71,0.18); border-color:var(--chalk-yellow); }
 .session-bar {
-  display:flex; justify-content:space-between; font-size:10px; color:var(--chalk-dim);
-  border-top:1px solid rgba(242,240,230,0.15); padding-top:6px; margin-top:6px;
+  display:flex; justify-content:space-between; font-size:1rem; color:var(--chalk-dim);
+  border-top:1px solid rgba(242,240,230,0.15); padding-top:0.6rem; margin-top:0.6rem;
 }
 .session-bar b { color:var(--chalk); }
-.footer-row { margin-top:6px; }
+.footer-row { margin-top:0.6rem; }
