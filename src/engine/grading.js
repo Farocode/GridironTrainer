@@ -82,8 +82,16 @@ export function gradeRun(chosen, box, blockers, stackSide, strongSide) {
  * is (a) actually offered by the called concept, (b) legal given
  * field position (no Deep inside the 10), and (c) — on 3rd/4th down
  * only — sufficient to plausibly reach the sticks.
+ *
+ * `shallowZoneDefender` is what gates checkdown out of its usual
+ * safe-floor treatment: it's a real, in-the-moment leverage read for
+ * THIS rep — a defender sitting shallow, in zone, close to the LOS
+ * — not blitz-specific, not a rolling pattern across reps. When
+ * it's true, checkdown didn't beat anybody; it got thrown right at a
+ * defender sitting on it, so it's graded like any other read instead
+ * of getting the automatic floor.
  */
-export function gradePass(chosen, prio, yardLine, down, distance, available) {
+export function gradePass(chosen, prio, yardLine, down, distance, available, shallowZoneDefender = false) {
   const deepIllegal = yardLine >= 90;
   const candidates = prio.filter((b) => available.includes(b) && !(b === "deep" && deepIllegal));
   const ideal = down >= 3
@@ -92,7 +100,10 @@ export function gradePass(chosen, prio, yardLine, down, distance, available) {
 
   if (chosen === "deep" && deepIllegal) return { tier: "Misread", ideal, reason: "field_position" };
   if (chosen === ideal) return { tier: "Ideal", ideal, reason: null };
-  if (chosen === "checkdown") return { tier: "Acceptable", ideal, reason: "conservative" };
+  if (chosen === "checkdown") {
+    if (!shallowZoneDefender) return { tier: "Acceptable", ideal, reason: "conservative" };
+    return { tier: "Misread", ideal, reason: "checkdown_risk" };
+  }
 
   const idx = prio.indexOf(chosen);
   const idealIdx = prio.indexOf(ideal);
@@ -198,6 +209,11 @@ export const PASS_PHRASES = {
     () => `No room to throw it deep from here, regardless of coverage \u2014 that's a boundary mistake, not a read mistake.`,
     () => `Field's too short for that depth. This one's about location, not the shell.`,
   ],
+  checkdown_risk: [
+    (fam, w, c) => `There was a defender sitting right in that shallow window, in zone, close to the LOS \u2014 checkdown wasn't the safe outlet it looked like. ${w} was clean.`,
+    (fam, w, c) => `Somebody was sitting on that checkdown the whole time \u2014 shallow, in zone, right on top of it. That's not an outlet, that's a target for them.`,
+    (fam, w, c) => `The safe-looking throw had a defender camped on it. ${w} was actually the cleaner window here.`,
+  ],
 };
 
 export function passExplain(pickVariant, term, g, mofo, press, blitz, chosenLabel) {
@@ -205,6 +221,7 @@ export function passExplain(pickVariant, term, g, mofo, press, blitz, chosenLabe
   const idealLabel = term.pass[g.ideal];
   if (g.reason === "field_position") return pickVariant("pass_fp", PASS_PHRASES.field_position)();
   if (g.tier === "Ideal") return pickVariant("pass_ideal", PASS_PHRASES.ideal)(fam, idealLabel);
+  if (g.reason === "checkdown_risk") return pickVariant("pass_checkdown_risk", PASS_PHRASES.checkdown_risk)(fam, idealLabel, chosenLabel);
   if (g.reason === "coverage_read") return pickVariant("pass_cov", PASS_PHRASES.coverage_read)(fam, idealLabel, chosenLabel);
   if (g.reason === "conservative") return pickVariant("pass_cons", PASS_PHRASES.conservative)(fam, idealLabel, chosenLabel);
   // "situational" used to be one generic bucket ("that needed more

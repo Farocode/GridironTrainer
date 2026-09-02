@@ -112,7 +112,7 @@ describe("gradePass", () => {
     expect(g.reason).toBe("field_position");
   });
 
-  test("Checkdown is never graded worse than Acceptable", () => {
+  test("Checkdown is never graded worse than Acceptable when no defender is sitting shallow in zone", () => {
     for (const concept of PASS_CONCEPTS) {
       for (let yardLine = 1; yardLine <= 99; yardLine += 11) {
         for (let down = 1; down <= 4; down++) {
@@ -128,6 +128,30 @@ describe("gradePass", () => {
         }
       }
     }
+  });
+
+  test("Checkdown is NOT an automatic floor when a defender is sitting shallow in zone near the LOS", () => {
+    // The real football trigger Michael specified: a single-rep
+    // leverage read, not blitz-specific and not pattern detection.
+    // When it's true and checkdown isn't the actual ideal read, the
+    // pick gets graded like any other read \u2014 it can be Misread.
+    const prio = priorityList(false, true, false); // MOFC + press: checkdown is dead last in priority
+    const g = gradePass("checkdown", prio, 50, 1, 10, ["checkdown", "short", "intermediate", "deep"], true);
+    expect(g.tier).toBe("Misread");
+    expect(g.reason).toBe("checkdown_risk");
+  });
+
+  test("shallow zone defender doesn't punish checkdown when checkdown actually IS the ideal read (blitz)", () => {
+    const prio = priorityList(true, true, true); // blitz: checkdown is ideal
+    const g = gradePass("checkdown", prio, 50, 1, 10, ["checkdown", "short", "intermediate", "deep"], true);
+    expect(g.tier).toBe("Ideal");
+  });
+
+  test("shallow zone defender flag defaults to off (no behavior change for existing callers)", () => {
+    const prio = priorityList(false, true, false);
+    const g = gradePass("checkdown", prio, 50, 1, 10, ["checkdown", "short", "intermediate", "deep"]);
+    expect(g.tier).toBe("Acceptable");
+    expect(g.reason).toBe("conservative");
   });
 
   test("MOFC + press: Deep is the textbook Ideal answer when field position allows it", () => {

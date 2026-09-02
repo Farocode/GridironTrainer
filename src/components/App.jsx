@@ -51,6 +51,11 @@ export default function App() {
     const press = Math.random() < coord.pressProb;
     const stackSide = pick(["left", "right"]);
     const shotgun = Math.random() < OFFENSE_FORMATIONS[formationId].shotgunProb;
+    // Independent, in-the-moment leverage read: a defender sitting
+    // shallow, in zone, close to the LOS this rep. Not tied to blitz
+    // (blitz already makes checkdown the correct answer on its own)
+    // and not a rolling pattern \u2014 see grading.js gradePass().
+    const shallowZoneDefender = Math.random() < 0.4;
 
     let mofoActual = mofoShown;
     let nudge = null;
@@ -69,8 +74,8 @@ export default function App() {
       formationId,
       callSide,
       shotgun,
-      shown: { mofo: mofoShown, press, blitz, box: finalBox, stackSide },
-      actual: { mofo: mofoActual, press, blitz, box: finalBox, stackSide },
+      shown: { mofo: mofoShown, press, blitz, box: finalBox, stackSide, shallowZoneDefender },
+      actual: { mofo: mofoActual, press, blitz, box: finalBox, stackSide, shallowZoneDefender },
       nudge,
     });
     setPhase("presnap");
@@ -121,7 +126,7 @@ export default function App() {
         explain = runExplain(variant, { ...g, chosen });
       } else {
         const prio = priorityList(actual.mofo, actual.press, actual.blitz);
-        const g = gradePass(chosen, prio, yardLine, down, distance, rep.concept.depths);
+        const g = gradePass(chosen, prio, yardLine, down, distance, rep.concept.depths, actual.shallowZoneDefender);
         tier = g.tier;
         explain = passExplain(variant, term, g, actual.mofo, actual.press, actual.blitz, label);
       }
