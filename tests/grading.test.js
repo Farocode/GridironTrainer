@@ -171,6 +171,36 @@ describe("gradePass", () => {
     const g = gradePass("checkdown", prio, 50, 1, 10, ["checkdown", "short", "intermediate", "deep"]);
     expect(g.tier).toBe("Ideal");
   });
+
+  test("situational Acceptable on 1st/2nd down is never distance-limited (no down/distance to fall short of)", () => {
+    const prio = priorityList(true, true, false); // MOFO+press: Short, Checkdown, Intermediate, Deep
+    const g = gradePass("intermediate", prio, 50, 1, 10, ["checkdown", "short", "intermediate", "deep"]);
+    expect(g.tier).toBe("Acceptable");
+    expect(g.distanceLimited).toBe(false);
+  });
+
+  test("situational Acceptable on 3rd down IS distance-limited when the chosen bucket's own ceiling can't reach the sticks", () => {
+    const prio = priorityList(false, false, false); // MOFC+off: Short, Intermediate, Checkdown, Deep
+    // 3rd & 15: Short's own BUCKET_MAX (9) can't reach it, so
+    // Intermediate becomes ideal. Choosing Short is still a live read
+    // (not the worst in priority), so it's Acceptable — and this
+    // time it genuinely IS a sticks shortfall.
+    const g = gradePass("short", prio, 50, 3, 15, ["checkdown", "short", "intermediate", "deep"]);
+    expect(g.tier).toBe("Acceptable");
+    expect(g.ideal).toBe("intermediate");
+    expect(g.distanceLimited).toBe(true);
+  });
+
+  test("situational Acceptable on 3rd down is NOT distance-limited when the chosen bucket could have reached the sticks anyway", () => {
+    const prio = priorityList(false, false, false); // MOFC+off: Short, Intermediate, Checkdown, Deep
+    // 3rd & 8: Intermediate's own ceiling (19) easily covers 8, so
+    // falling short of the ideal (Short) here isn't a distance
+    // problem — it's a value/leverage read, same as any early-down case.
+    const g = gradePass("intermediate", prio, 50, 3, 8, ["checkdown", "short", "intermediate", "deep"]);
+    expect(g.tier).toBe("Acceptable");
+    expect(g.ideal).toBe("short");
+    expect(g.distanceLimited).toBe(false);
+  });
 });
 
 describe("formation data sanity", () => {

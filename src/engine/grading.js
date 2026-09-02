@@ -108,7 +108,19 @@ export function gradePass(chosen, prio, yardLine, down, distance, available, sha
   const idx = prio.indexOf(chosen);
   const idealIdx = prio.indexOf(ideal);
   if (idx > idealIdx && idx === prio.length - 1) return { tier: "Misread", ideal, reason: "coverage_read" };
-  return { tier: "Acceptable", ideal, reason: "situational" };
+  // Two different reasons a non-ideal pick still lands Acceptable, and
+  // they need different feedback copy (see passExplain): a real
+  // down/distance shortfall only exists on 3rd/4th down, when BUCKET_MAX
+  // filtering is actually in play. Anywhere else — 1st/2nd down, or
+  // 3rd down where the chosen bucket WOULD have reached the sticks —
+  // "not enough yards" isn't the actual mechanism; the shell just gave
+  // up a better window than the one thrown. Conflating the two (as an
+  // earlier version did, routing every non-blitz "situational" case
+  // through distance-shortfall phrasing regardless of down) reads as
+  // "throwing short of the sticks is inherently the problem," which
+  // isn't the lesson on 1st & 10.
+  const distanceLimited = down >= 3 && BUCKET_MAX[chosen] < distance;
+  return { tier: "Acceptable", ideal, reason: "situational", distanceLimited };
 }
 
 // ---------- Feedback phrasing ----------
@@ -205,6 +217,17 @@ export const PASS_PHRASES = {
     (fam, w, c) => `The read direction wasn't wrong, but ${c.toLowerCase()} doesn't reliably reach the sticks here \u2014 down and distance needed more depth than that.`,
     (fam, w, c) => `Right idea, not enough of it. That depth is short of what this down and distance actually calls for.`,
   ],
+  // For every non-blitz Acceptable case that ISN'T an actual 3rd/4th-
+  // down sticks shortfall (see gradePass's distanceLimited check).
+  // Deliberately doesn't mention yards or the marker at all \u2014 the
+  // point isn't "you came up short," it's "the shell gave up a bigger
+  // window than the one you took."
+  situational_value: [
+    (fam, w, c) => `${fam} \u2014 ${w} was the bigger window there, not just the safer one. ${c} isn't wrong, it's just not what this shell gave up.`,
+    (fam, w, c) => `Not a bad process \u2014 just left value on the table. ${w} was the higher-value read against this look.`,
+    (fam, w, c) => `${c} works, but ${w.toLowerCase()} was the actual advantage this shell handed you.`,
+    (fam, w, c) => `Nothing wrong with ${c.toLowerCase()} here, but the alignment supported ${w.toLowerCase()} better.`,
+  ],
   field_position: [
     () => `No room to throw it deep from here, regardless of coverage \u2014 that's a boundary mistake, not a read mistake.`,
     () => `Field's too short for that depth. This one's about location, not the shell.`,
@@ -229,7 +252,7 @@ export function passExplain(pickVariant, term, g, mofo, press, blitz, chosenLabe
   // short. Split by mechanism: holding the ball into a live blitz is
   // a pressure-exposure risk; anywhere else it's a down/distance
   // shortfall. Different coaching point, different sentence.
-  return blitz
-    ? pickVariant("pass_sit_pressure", PASS_PHRASES.situational_pressure)(fam, idealLabel, chosenLabel)
-    : pickVariant("pass_sit_distance", PASS_PHRASES.situational_distance)(fam, idealLabel, chosenLabel);
+  if (blitz) return pickVariant("pass_sit_pressure", PASS_PHRASES.situational_pressure)(fam, idealLabel, chosenLabel);
+  if (g.distanceLimited) return pickVariant("pass_sit_distance", PASS_PHRASES.situational_distance)(fam, idealLabel, chosenLabel);
+  return pickVariant("pass_sit_value", PASS_PHRASES.situational_value)(fam, idealLabel, chosenLabel);
 }
