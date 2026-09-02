@@ -21,15 +21,18 @@ export default function FieldView({ shown, nudge, formationId, callSide, shotgun
   const defenders = [...safetiesN, ...corners, ...lbs];
 
   return (
-    // viewBox bottom was 313 (295 field + the -18 top margin), but
-    // nothing ever draws past y=243 (deepest off-line receiver, y=232,
-    // +11 radius) — that was 52 units (~17%) of pure blank chalkboard
-    // baked into every render, inflating the SVG's rendered height on
-    // narrow viewports and forcing a scroll to see the whole board on
-    // phones. Trimmed to 268 (243 + a little breathing room). Top
-    // margin (-18) is untouched — it's sized for the disguise
-    // tell-ring's worst case (nudged safety + r=19 ring), not slack.
-    <svg viewBox="0 -18 400 268" className="field-svg" role="img" aria-label="defensive look">
+    // viewBox height is 313 (range y=-18 to y=295). An earlier pass
+    // tried to trim this as "dead space" using the wrong number — it
+    // checked personnelFor's generic off-line default (y=232) and
+    // missed that formations override backfield y explicitly (p21's
+    // RB sits at y=248) AND that a shotgun QB drops to formation.
+    // qbShotgunY (up to 270, p12/p10). With r=11 that's a real content
+    // bottom of 281, not 243 — the trimmed version was clipping the
+    // I-Strong RB and would've clipped a deep shotgun QB too. 295
+    // leaves a real (if modest, ~14 units) margin below the actual
+    // deepest content. Top margin (-18) is sized for the disguise
+    // tell-ring's worst case (nudged safety + r=19 ring).
+    <svg viewBox="0 -18 400 313" className="field-svg" role="img" aria-label="defensive look">
       <defs>
         <filter id="chalkRough" x="-20%" y="-20%" width="140%" height="140%">
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />
@@ -48,9 +51,16 @@ export default function FieldView({ shown, nudge, formationId, callSide, shotgun
         <line key={y} x1="10" y1={y} x2="390" y2={y} className="yardline" />
       ))}
       <line x1="10" y1="210" x2="390" y2="210" className="los" />
+      {/* y=233 (was 222): at 222 this sat squarely inside the
+          on-line outside WR's circle (y=214, r=11 -> spans 203-225)
+          at the same edge x this label anchors to, so the tag was
+          invisible behind the receiver rather than actually reading
+          as a strong-side indicator. 233 clears the WR's bottom edge;
+          off-line (flexed/slot) receivers never sit at this edge x,
+          so nothing else is in this spot. */}
       <text
         x={callSide === "right" ? 385 : 15}
-        y="222"
+        y="233"
         textAnchor={callSide === "right" ? "end" : "start"}
         className="strong-label"
       >

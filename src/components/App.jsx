@@ -17,9 +17,8 @@ import "../theme.css";
 
 export default function App() {
   const [phase, setPhase] = useState("setup");
-  const [termId, setTermId] = useState("standard");
   const [offenseStyle, setOffenseStyle] = useState(null);
-  const [coordinator, setCoordinator] = useState(null);
+  const [coordinator, setCoordinator] = useState(COORDINATORS[0]);
 
   const [down, setDown] = useState(1);
   const [distance, setDistance] = useState(10);
@@ -32,7 +31,10 @@ export default function App() {
   const [stats, setStats] = useState({ Ideal: 0, Acceptable: 0, Misread: 0 });
   const logRef = useRef(null);
   const variant = useVariantPicker();
-  const term = TERM_PRESETS[termId];
+  // Terminology picking was removed (single-preset, less setup friction
+  // before the player has even seen the app) — the app speaks Standard
+  // throughout. See README/session log if a preset picker comes back.
+  const term = TERM_PRESETS.standard;
 
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = 0;
@@ -82,8 +84,11 @@ export default function App() {
   }
 
   function chooseOffenseStyle(style) {
+    // Coordinator is picked directly by the player on the setup
+    // screen now (SetupScreen's prev/next toggle), not randomized
+    // here — `coordinator` state already holds whatever they landed
+    // on before clicking an offensive identity.
     setOffenseStyle(style);
-    setCoordinator(pick(COORDINATORS));
     setPhase("scouting");
   }
 
@@ -204,7 +209,12 @@ export default function App() {
         <p className="subtitle">Count the box, read the shell, make the call. Graded on decision quality.</p>
 
         {phase === "setup" && (
-          <SetupScreen termId={termId} setTermId={setTermId} onChooseStyle={chooseOffenseStyle} />
+          <SetupScreen
+            offenseStyleId={offenseStyle?.id}
+            onChooseStyle={chooseOffenseStyle}
+            coordinator={coordinator}
+            setCoordinator={setCoordinator}
+          />
         )}
 
         {phase === "scouting" && coordinator && (

@@ -146,9 +146,26 @@ h1.title { font-family:'Anton',sans-serif; letter-spacing:0.03em; font-size:2.3r
 .scout-card { border:1px solid rgba(242,240,230,0.25); border-radius:0.6rem; padding:1.2rem; margin-bottom:1.2rem; }
 .scout-card h3 { font-family:'Anton',sans-serif; font-size:1.6rem; color:var(--chalk-yellow); margin:0 0 0.6rem; }
 .scout-card p { font-size:1.2rem; line-height:1.6; margin:0 0 0.8rem; color:var(--chalk); }
-.term-row { display:flex; gap:0.6rem; margin-bottom:1rem; }
-.term-row button { flex:1; }
-.term-row .active { background:rgba(232,197,71,0.18); border-color:var(--chalk-yellow); }
+.btn.active { background:rgba(232,197,71,0.18); border-color:var(--chalk-yellow); }
+/* Defensive-coordinator prev/next toggle on the setup screen. Coordinator
+   names/blurbs run long, so unlike the old (now-removed) terminology
+   row this isn't a row of N buttons \u2014 one coordinator is shown at a
+   time, with arrow buttons on either side to cycle. */
+.coord-toggle { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.6rem; }
+.coord-arrow {
+  background:rgba(242,240,230,0.06); border:1px solid rgba(242,240,230,0.3); border-radius:0.6rem;
+  color:var(--chalk); font-size:1.8rem; line-height:1; cursor:pointer; flex:0 0 auto;
+  width:3.6rem; height:3.6rem; display:flex; align-items:center; justify-content:center;
+}
+.coord-arrow:hover { background:rgba(242,240,230,0.14); }
+.coord-arrow:active { transform:scale(0.96); }
+.coord-display {
+  flex:1; min-width:0; text-align:center; border:1px solid rgba(242,240,230,0.25); border-radius:0.6rem;
+  padding:0.8rem 1rem;
+}
+.coord-name { font-family:'Anton',sans-serif; font-size:1.4rem; color:var(--chalk-yellow); letter-spacing:0.01em; }
+.coord-blurb { font-size:1.1rem; color:var(--chalk); line-height:1.5; margin-top:0.4rem; }
+.coord-count { font-size:0.9rem; color:var(--chalk-dim); margin-top:0.5rem; letter-spacing:0.05em; }
 .session-bar {
   display:flex; justify-content:space-between; font-size:1rem; color:var(--chalk-dim);
   border-top:1px solid rgba(242,240,230,0.15); padding-top:0.6rem; margin-top:0.6rem;
