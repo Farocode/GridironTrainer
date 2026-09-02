@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { gradeRun, gradePass, priorityList } from "../src/engine/grading.js";
-import { computeBox, personnelFor, safetyPositions } from "../src/engine/formationMath.js";
+import { computeBox, personnelFor, safetyPositions, lbPositions } from "../src/engine/formationMath.js";
 import { OFFENSE_FORMATIONS } from "../src/data/formations.js";
 import { PASS_CONCEPTS } from "../src/data/concepts.js";
 
@@ -374,3 +374,38 @@ describe("personnelFor — on-line vs off-line receiver depth", () => {
   });
 });
 
+describe("lbPositions — stack-side lean is actually readable", () => {
+  // Regression test: the stack-side shift used to be 35 units (< 9%
+  // of the 400-unit-wide field) — legible in isolation but not against
+  // a fixed, centered DL row and the rest of a full defensive look
+  // ("I can't really tell if the 11th unseen defender is on the right
+  // or left side"). This just pins the shift to something clearly
+  // bigger than the old value, not a specific new one, so it catches
+  // a regression back toward "subtle" without locking in an exact px.
+  const OLD_SHIFT = 35;
+
+  test("left vs right stackSide produces a clearly different average x, well past the old (too-subtle) shift", () => {
+    const left = lbPositions(3, "left");
+    const right = lbPositions(3, "right");
+    const avg = (arr) => arr.reduce((s, p) => s + p.x, 0) / arr.length;
+    const delta = avg(right) - avg(left);
+    expect(delta).toBeGreaterThan(OLD_SHIFT * 2); // old shift was ±35, i.e. 70 apart
+  });
+
+  test("single-LB case (count=1) still gets the full exaggerated shift, not just the multi-LB spread", () => {
+    const [left] = lbPositions(1, "left");
+    const [right] = lbPositions(1, "right");
+    expect(right.x - left.x).toBeGreaterThan(OLD_SHIFT * 2);
+  });
+
+  test("shifted LB positions stay within the visible field bounds (no clamping eating the exaggeration)", () => {
+    for (const stackSide of ["left", "right"]) {
+      for (let count = 1; count <= 5; count++) {
+        for (const p of lbPositions(count, stackSide)) {
+          expect(p.x, `count=${count} stackSide=${stackSide}`).toBeGreaterThanOrEqual(50);
+          expect(p.x, `count=${count} stackSide=${stackSide}`).toBeLessThanOrEqual(350);
+        }
+      }
+    }
+  });
+});

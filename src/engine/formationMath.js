@@ -71,10 +71,16 @@ export function safetyPositions(shown, nudge) {
  * right to visually represent which side the extra box defender(s)
  * are stacked toward. This is the ONLY place stackSide is expressed —
  * deliberately visual, never labeled as text (see design notes in README).
+ *
+ * Shift was 35 (< 9% of the 400-unit-wide field) — too subtle to
+ * actually read at a glance against a fixed, centered DL row and the
+ * rest of a full defensive look ("I can't really tell if the 11th
+ * unseen defender is on the right or left side"). Bumped to 60. Still
+ * a pure visual read, no text — just an actually-visible one.
  */
 export function lbPositions(count, stackSide) {
   if (count <= 0) return [];
-  const shift = stackSide === "left" ? -35 : 35;
+  const shift = stackSide === "left" ? -60 : 60;
   const left = 130 + shift;
   const right = 270 + shift;
   const arr = [];
