@@ -5,7 +5,7 @@ import { OFFENSE_FORMATIONS } from "../data/formations";
 import { RUN_CONCEPTS, PASS_CONCEPTS } from "../data/concepts";
 import { pick, randInt, ordinal, fieldPos } from "../engine/utils";
 import { priorityList, familyLabel, gradeRun, gradePass, runExplain, passExplain, BUCKET_MID } from "../engine/grading";
-import { computeBox } from "../engine/formationMath";
+import { computeBox, pickDLCount } from "../engine/formationMath";
 import { useVariantPicker } from "../hooks/useVariantPicker";
 import FieldView from "./FieldView";
 import SetupScreen from "./SetupScreen";
@@ -69,6 +69,10 @@ export default function App() {
     // alignment, not personnel grouping) so total defenders on screen
     // always reads as a real, coherent 11-man defense.
     const finalBox = computeBox(mofoActual, coord.boxBias, blitz, randInt);
+    // Front size — not disguised, same as box/blitz. LB count is
+    // derived from this at render time (box - dlCount), so the two
+    // stay in sync by construction; see FieldView.jsx.
+    const dlCount = pickDLCount();
 
     setRep({
       callType,
@@ -76,8 +80,8 @@ export default function App() {
       formationId,
       callSide,
       shotgun,
-      shown: { mofo: mofoShown, press, blitz, box: finalBox, stackSide, shallowZoneDefender },
-      actual: { mofo: mofoActual, press, blitz, box: finalBox, stackSide, shallowZoneDefender },
+      shown: { mofo: mofoShown, press, blitz, box: finalBox, stackSide, shallowZoneDefender, dlCount },
+      actual: { mofo: mofoActual, press, blitz, box: finalBox, stackSide, shallowZoneDefender, dlCount },
       nudge,
     });
     setPhase("presnap");

@@ -255,17 +255,19 @@ Captured here specifically so they survive a fresh chat/context reset
 - **Let the player choose which defensive coordinator to face**,
   instead of always being assigned one at random at setup. Random
   assignment stays the default; add the option to pick one directly.
-- **Always-11 defense with a variable front (3/4/5-man DL, weighted to
-  a side) instead of a fixed 4-man line.** Explicitly deprioritized —
-  design decision, not an oversight: safety count (MOFO/MOFC) is the
-  first and most important read in the whole progression, and front
-  variation is texture on top of the box-count read, not a new skill
-  the trainer should be teaching yet. Don't build this until the core
-  safety/box/leverage progression is solid and tested. When it's time:
-  the current `computeBox()` bounds the total to ~10-12 as an
-  approximation; a true fix makes DL count variable and derives
-  `LB = 11 - DL - CB(2) - Safeties(1 or 2)` so the total is always
-  exactly 11 by construction, not a range.
+- ~~Always-11 defense with a variable front~~ **Built (small-scope
+  version), 2026-09.** `pickDLCount()` picks a 3/4/5-man front
+  (weighted 35/55/10, `formationMath.js`), `dlPositions()` renders it,
+  and LB count is `box - dlCount` — real labels on every front
+  defender instead of 4 anonymous DL dots. Deliberately did NOT do the
+  bigger version once described here (nickel/dime packages, CB count
+  varying up to 5-6 DBs, or deriving an exactly-11-by-construction
+  total) — that's a real personnel-package system, a genuine scope
+  jump, and explicitly punted per Michael's standing "keep this small"
+  direction (see session log). `computeBox()`'s total-defenders range
+  is unchanged (still the same ~10-12 approximation as before, not
+  forced to exactly 11) — this only changed how that same total is
+  split into DL vs LB for display, not the underlying box math.
 
 ## Extending
 

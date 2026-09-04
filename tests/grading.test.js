@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { gradeRun, gradePass, priorityList } from "../src/engine/grading.js";
-import { computeBox, personnelFor, safetyPositions, lbPositions } from "../src/engine/formationMath.js";
+import { computeBox, personnelFor, safetyPositions, lbPositions, dlPositions, pickDLCount } from "../src/engine/formationMath.js";
 import { OFFENSE_FORMATIONS } from "../src/data/formations.js";
 import { PASS_CONCEPTS } from "../src/data/concepts.js";
 
@@ -374,6 +374,32 @@ describe("personnelFor — on-line vs off-line receiver depth", () => {
   });
 });
 
+describe("lbPositions — never overlaps the corners", () => {
+  // Regression test: the clamp bounds used to be (50, 350) — exactly
+  // the CB x-positions — so a low LB count (Always-11's 5-man front
+  // can leave just 1-2 backers) combined with the exaggerated stack
+  // shift could land an LB circle flush against or overlapping a CB
+  // circle. Both are r=13, at CB x=50/350, so an LB needs to clear
+  // roughly x=76..324 to not touch either one, with real margin.
+  const CB_X = [50, 350];
+  const RADIUS_SUM = 26; // 13 + 13
+
+  test("every LB position stays clear of both corners, for every count (1-7) and stackSide", () => {
+    for (const stackSide of ["left", "right"]) {
+      for (let count = 1; count <= 7; count++) {
+        for (const lb of lbPositions(count, stackSide)) {
+          for (const cbX of CB_X) {
+            expect(
+              Math.abs(lb.x - cbX),
+              `count=${count} stackSide=${stackSide} lb.x=${lb.x} cbX=${cbX}`
+            ).toBeGreaterThan(RADIUS_SUM);
+          }
+        }
+      }
+    }
+  });
+});
+
 describe("lbPositions — stack-side lean is actually readable", () => {
   // Regression test: the stack-side shift used to be 35 units (< 9%
   // of the 400-unit-wide field) — legible in isolation but not against
@@ -406,6 +432,78 @@ describe("lbPositions — stack-side lean is actually readable", () => {
           expect(p.x, `count=${count} stackSide=${stackSide}`).toBeLessThanOrEqual(350);
         }
       }
+    }
+  });
+});
+
+describe("pickDLCount — weighted front size (3/4/5-man)", () => {
+  test("always returns 3, 4, or 5", () => {
+    for (let i = 0; i < 500; i++) {
+      const n = pickDLCount();
+      expect([3, 4, 5]).toContain(n);
+    }
+  });
+
+  test("boundaries land on the documented weights (35% / 55% / 10%) with an injected rand", () => {
+    expect(pickDLCount(() => 0)).toBe(3);
+    expect(pickDLCount(() => 0.349)).toBe(3);
+    expect(pickDLCount(() => 0.35)).toBe(4);
+    expect(pickDLCount(() => 0.899)).toBe(4);
+    expect(pickDLCount(() => 0.9)).toBe(5);
+    expect(pickDLCount(() => 0.999)).toBe(5);
+  });
+
+  test("4-man front is the plurality over a large sample (roughly 55%)", () => {
+    let fours = 0;
+    const N = 5000;
+    for (let i = 0; i < N; i++) if (pickDLCount() === 4) fours++;
+    expect(fours / N).toBeGreaterThan(0.45);
+    expect(fours / N).toBeLessThan(0.65);
+  });
+});
+
+describe("dlPositions — variable-size DL row", () => {
+  test("returns exactly `count` x-positions for 3, 4, and 5", () => {
+    expect(dlPositions(3)).toHaveLength(3);
+    expect(dlPositions(4)).toHaveLength(4);
+    expect(dlPositions(5)).toHaveLength(5);
+  });
+
+  test("single lineman centers on the ball (x=200)", () => {
+    expect(dlPositions(1)).toEqual([200]);
+  });
+
+  test("every front spans the same outer width (162 to 238), regardless of count", () => {
+    for (const count of [2, 3, 4, 5]) {
+      const xs = dlPositions(count);
+      expect(Math.min(...xs)).toBeCloseTo(162, 5);
+      expect(Math.max(...xs)).toBeCloseTo(238, 5);
+    }
+  });
+
+  test("no two DL marks overlap for any front size (12-wide marks, so need >=12 apart)", () => {
+    for (const count of [3, 4, 5]) {
+      const xs = dlPositions(count);
+      for (let i = 1; i < xs.length; i++) {
+        expect(xs[i] - xs[i - 1]).toBeGreaterThanOrEqual(12);
+      }
+    }
+  });
+});
+
+describe("box → DL/LB split invariant", () => {
+  // DL count (3-5) must never exceed box (always >=6), or LB count
+  // would clamp to 0 and the total-defenders-in-11 invariant computeBox
+  // guarantees would silently break for that rep.
+  test("DL count never exceeds box, across a wide sample of coordinator/shell combos", () => {
+    function randInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+    for (let trial = 0; trial < 2000; trial++) {
+      const boxBias = [-1, 0, 1][trial % 3];
+      const blitz = trial % 7 === 0;
+      const mofoActual = trial % 2 === 0;
+      const box = computeBox(mofoActual, boxBias, blitz, randInt);
+      const dlCount = pickDLCount();
+      expect(dlCount, `box=${box} dlCount=${dlCount}`).toBeLessThanOrEqual(box);
     }
   });
 });

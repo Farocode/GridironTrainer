@@ -30,17 +30,37 @@ export function personnelFor(formation, callSide, shotgun) {
  * Box count generation. Deliberately tied to the TRUE safety count
  * (not the pre-snap shown one, since disguise only changes depth/
  * alignment, not personnel grouping) and bounded per shell so total
- * defenders on screen (DL 4 + LB[box-4] + CB 2 + S[1 or 2]) always
+ * defenders on screen (box[DL+LB combined] + CB 2 + S[1 or 2]) always
  * lands in a realistic ~10-12 range. An earlier version rolled box
  * count from an independent random draw uncorrelated with the
  * safety count being displayed, which produced reps with as few as
  * 8 visible defenders — this function fixes that.
+ *
+ * `box` is the combined DL+LB count, same as always — pickDLCount
+ * (below) only decides how that same total splits between the two
+ * rows for display, so this range guarantee is untouched by that.
  */
 export function computeBox(mofoActual, boxBias, blitz, randInt) {
   if (blitz) return randInt(8, 9);
   const [lo, hi] = mofoActual ? [6, 8] : [7, 9];
   const base = mofoActual ? randInt(6, 7) : randInt(7, 8);
   return Math.max(lo, Math.min(hi, base + boxBias));
+}
+
+/**
+ * Front size (DL count) for the rep, weighted rather than uniform —
+ * a 4-man front is the most common look, 3-man fairly common, 5-man
+ * rare (short-yardage / goal-line). LB count is then whatever's left
+ * of `box` after DL is subtracted (see FieldView.jsx), so this and
+ * computeBox together still land on exactly `box` total front+backer
+ * defenders — this only decides how that total is split into the two
+ * rows. `rand` defaults to Math.random and is injectable for tests.
+ */
+export function pickDLCount(rand = Math.random) {
+  const r = rand();
+  if (r < 0.35) return 3;
+  if (r < 0.90) return 4;
+  return 5;
 }
 
 
@@ -87,10 +107,33 @@ export function lbPositions(count, stackSide) {
   for (let i = 0; i < count; i++) {
     const t = count === 1 ? 0.5 : i / (count - 1);
     arr.push({
-      x: Math.max(50, Math.min(350, left + t * (right - left))),
+      // Clamp bounds were (50, 350) — exactly the CB x-positions, so
+      // an LB circle (r13) could land flush against or overlapping a
+      // CB circle (also r13) instead of just short of it. Wasn't hit
+      // by the diff=1, box=7-8 reps checked when the shift itself was
+      // bumped to 60, but Always-11's smaller LB counts (a 5-man
+      // front can leave just 1-2 backers) reach the shifted extremes
+      // more often, where it DID show up as two overlapping labels.
+      // (95, 305) keeps at least a ~19-unit gap from either CB edge.
+      x: Math.max(95, Math.min(305, left + t * (right - left))),
       y: 176 + (i % 2 === 0 ? 0 : 8),
       role: "LB",
     });
   }
   return arr;
+}
+
+/**
+ * X positions for a variable-size DL row, evenly spread across the
+ * same 162-238 span the old fixed 4-man front used (unlike LB, the
+ * DL row doesn't lean with stackSide — real fronts don't shift with
+ * the extra box defender the way linebacker depth/alignment does).
+ */
+export function dlPositions(count) {
+  if (count <= 0) return [];
+  if (count === 1) return [200];
+  const span = 76; // 238 - 162, the original front's outer spread
+  const left = 200 - span / 2;
+  const step = span / (count - 1);
+  return Array.from({ length: count }, (_, i) => left + i * step);
 }

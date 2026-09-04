@@ -1,5 +1,5 @@
 import { OFFENSE_FORMATIONS } from "../data/formations";
-import { personnelFor, lbPositions, safetyPositions } from "../engine/formationMath";
+import { personnelFor, lbPositions, safetyPositions, dlPositions } from "../engine/formationMath";
 
 /**
  * Renders the pre-snap (or post-snap "actual") defensive look plus
@@ -16,7 +16,10 @@ export default function FieldView({ shown, nudge, formationId, callSide, shotgun
     { x: 50, y: shown.press ? 180 : 140, role: "CB" },
     { x: 350, y: shown.press ? 180 : 140, role: "CB" },
   ];
-  const lbCount = Math.max(0, Math.min(5, shown.box - 4));
+  // dlCount defaults to 4 (the old fixed front) if a caller somehow
+  // doesn't pass it, so this never divides the box up wrong.
+  const dlCount = shown.dlCount ?? 4;
+  const lbCount = Math.max(0, Math.min(7, shown.box - dlCount));
   const lbs = lbPositions(lbCount, shown.stackSide).map((lb) => (shown.blitz ? { ...lb, blitz: true } : lb));
   const defenders = [...safetiesN, ...corners, ...lbs];
 
@@ -80,8 +83,8 @@ export default function FieldView({ shown, nudge, formationId, callSide, shotgun
       </g>
 
       <g filter="url(#chalkRough)" className="dline">
-        {[162, 188, 212, 238].map((x) => (
-          <g key={x}>
+        {dlPositions(dlCount).map((x, i) => (
+          <g key={i}>
             <rect x={x - 6} y="194" width="12" height="8" className="dl-mark" />
             <text x={x} y="191" textAnchor="middle" className="dl-label">DL</text>
           </g>
